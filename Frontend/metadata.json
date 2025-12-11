@@ -1,0 +1,5 @@
+{
+  "name": "New Windows Store",
+  "description": "A modern e-commerce platform for windows featuring a product catalog, user roles (Admin/Customer), cart management, and an AI-powered shopping assistant.",
+  "requestFramePermissions": []
+}

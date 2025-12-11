@@ -1,0 +1,192 @@
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
+using SantehOrders.API.Data;
+using SantehOrders.API.Models;
+using SantehOrders.API.DTOs;
+
+namespace SantehOrders.API.Controllers
+{
+    [ApiController]
+    [Route("api/[controller]")]
+    public class OrdersController : ControllerBase
+    {
+        private readonly SantehContext _context;
+
+        public OrdersController(SantehContext context) { _context = context; }
+
+        [HttpGet]
+        [Authorize]
+        public async Task<IActionResult> GetAll()
+        {
+            var result = await _context.Orders
+                .Select(o => new
+                {
+                    o.OrderId,
+                    o.UserId,
+                    UserName = o.User.FullName,
+                    o.StatusId,
+                    StatusName = o.Status.Name,
+                    o.TotalAmount,
+                    o.CreatedAt,
+                    o.UpdatedAt,
+                    AssignedToUserId = o.AssignedEmployeeId,
+                    AssignedToName = o.AssignedEmployee.FullName,
+                    Items = o.Items.Select(i => new
+                    {
+                        i.OrderItemId,
+                        i.ProductId,
+                        i.Quantity,
+                        i.Price
+                    }).ToList()
+                })
+                .ToListAsync();
+
+            return Ok(result);
+        }
+
+
+
+        // DEBUG: return raw orders from DB (no filtering) to help verify data in development
+        [HttpGet("dbg/all")]
+        public async Task<IActionResult> DebugAll()
+        {
+            var list = await _context.Orders
+                .Include(o => o.Items)
+                .ThenInclude(i => i.Product)
+                .Include(o => o.Status)
+                .ToListAsync();
+
+            return Ok(list);
+        }
+
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetById(int id)
+        {
+            var order = await _context.Orders
+                .Include(o => o.User)
+                .Include(o => o.Status)
+                .Include(o => o.AssignedEmployee)
+                .Include(o => o.Items)
+                    .ThenInclude(i => i.Product)
+                .FirstOrDefaultAsync(o => o.OrderId == id);
+
+
+            if (order == null) return NotFound();
+
+            var orderDto = new OrderDto
+            {
+                OrderId = order.OrderId,
+                UserId = order.UserId,
+                UserName = order.User?.FullName,
+                StatusId = order.StatusId,
+                Status = order.Status?.Name,
+                CreatedAt = order.CreatedAt,
+                UpdatedAt = order.UpdatedAt,
+                TotalAmount = order.TotalAmount,
+                AssignedToUserId = order.AssignedEmployeeId,
+                AssignedToName = order.AssignedEmployee?.FullName,
+                Items = order.Items.Select(i => new OrderItemDto
+                {
+                    OrderItemId = i.OrderItemId,
+                    OrderId = i.OrderId,
+                    ProductId = i.ProductId,
+                    ProductName = i.Product?.Name,
+                    Quantity = i.Quantity,
+                    Price = i.Price
+                }).ToList()
+            };
+
+            return Ok(orderDto);
+        }
+
+
+
+
+        [HttpPost]
+        [Authorize]
+        public async Task<IActionResult> Create(CreateOrderDto dto)
+        {
+            if (dto.UserId <= 0 || !await _context.Users.AnyAsync(u => u.UserId == dto.UserId))
+            {
+                return BadRequest("Пользователь не найден");
+            }
+
+            if (dto.Items == null || !dto.Items.Any())
+            {
+                return BadRequest("Список товаров пуст");
+            }
+
+            var productIds = dto.Items.Select(i => i.ProductId).ToList();
+            var products = await _context.Products
+                .Where(p => productIds.Contains(p.ProductId))
+                .ToDictionaryAsync(p => p.ProductId);
+
+            foreach (var item in dto.Items)
+            {
+                if (!products.ContainsKey(item.ProductId))
+                {
+                    return BadRequest($"Товар с ID {item.ProductId} не найден");
+                }
+            }
+
+            var order = new Order
+            {
+                UserId = dto.UserId,
+                StatusId = 1,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow,
+                AssignedEmployeeId = null,
+                Items = dto.Items.Select(i => new OrderItem
+                {
+                    ProductId = i.ProductId,
+                    Quantity = i.Quantity,
+                    Price = products[i.ProductId].Price
+                }).ToList()
+            };
+
+            order.TotalAmount = order.Items.Sum(i => i.Quantity * i.Price);
+
+            _context.Orders.Add(order);
+            await _context.SaveChangesAsync();
+
+            var orderDto = new OrderDto
+            {
+                OrderId = order.OrderId,
+                UserId = order.UserId,
+                Status = "Создан",
+                CreatedAt = order.CreatedAt,
+                UpdatedAt = order.UpdatedAt,
+                TotalAmount = order.TotalAmount,
+                UserName = (await _context.Users
+                            .Where(u => u.UserId == order.UserId)
+                            .Select(u => u.FullName)
+                            .FirstOrDefaultAsync()) ?? "",
+                AssignedToName = null,
+                Items = order.Items.Select(i => new OrderItemDto
+                {
+                    ProductId = i.ProductId,
+                    ProductName = products[i.ProductId].Name,
+                    Quantity = i.Quantity,
+                    Price = i.Price
+                }).ToList()
+            };
+
+            return CreatedAtAction(nameof(GetAll), new { id = order.OrderId }, orderDto);
+        }
+
+
+        [HttpPut("{id}/status")]
+        [Authorize]
+        public async Task<IActionResult> UpdateStatus(int id, [FromBody] int statusId)
+        {
+            var order = await _context.Orders.FindAsync(id);
+            if (order == null) return NotFound();
+            order.StatusId = statusId;
+            order.UpdatedAt = DateTime.UtcNow;
+            await _context.SaveChangesAsync();
+            return NoContent();
+        }
+    }
+}
