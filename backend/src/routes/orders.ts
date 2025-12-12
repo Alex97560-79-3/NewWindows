@@ -2,7 +2,7 @@ import { Router } from 'express';
 import db from '../db';
 import { authMiddleware, AuthRequest } from '../middleware/auth';
 import { requireRole } from '../middleware/role';
-import { Order, OrderItem } from '../types';
+import { Order, OrderItem, OrderComment } from '../types';
 
 const router = Router();
 
@@ -31,7 +31,9 @@ router.get('/:id', authMiddleware, async (req: AuthRequest, res) => {
     const order = await db<Order>('orders').where({ id }).first();
     if (!order) return res.status(404).json({ error: 'Not found' });
     const items = await db<OrderItem>('order_items').where({ order_id: id });
-    const comments = await db('order_comments').where({ order_id: id }).orderBy('created_at', 'asc');
+    const comments = await db<OrderComment>('order_comments')
+      .where({ order_id: id })
+      .orderBy('created_at', 'asc');
     res.json({ data: { ...order, items, comments } });
   } catch (err: any) {
     console.error(err);
