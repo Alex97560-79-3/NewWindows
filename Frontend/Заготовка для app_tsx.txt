@@ -1,0 +1,162 @@
+// ---------------- Auth ----------------
+const handleLogin = async (email: string, password: string) => {
+  try {
+    const { data } = await login(email, password);
+    setAuthToken(data.token);
+    localStorage.setItem('token', data.token);
+    setCurrentUser(data.user);
+    setIsLoggedIn(true);
+
+    // Навигация по ролям
+    switch (data.user.role) {
+      case UserRole.ADMIN:
+        setCurrentView('admin-products');
+        break;
+      case UserRole.MANAGER:
+        setCurrentView('manager-dashboard');
+        break;
+      case UserRole.ASSEMBLER:
+        setCurrentView('assembler-dashboard');
+        break;
+      default:
+        setCurrentView('catalog');
+    }
+  } catch (err: any) {
+    alert(err.response?.data?.message || 'Ошибка входа');
+  }
+};
+
+const handleLogout = () => {
+  setAuthToken(null);
+  localStorage.removeItem('token');
+  setCurrentUser(null);
+  setIsLoggedIn(false);
+  setCurrentView('catalog');
+};
+
+// ---------------- Users ----------------
+const handleAddUser = async (user: Partial<User>) => {
+  try {
+    const { data } = await createUser(user);
+    setUsers(prev => [...prev, data]);
+  } catch (err: any) {
+    alert(err.response?.data?.message || 'Ошибка добавления пользователя');
+  }
+};
+
+const handleUpdateUser = async (user: Partial<User> & { id: number }) => {
+  try {
+    const { data } = await updateUser(user.id, user);
+    setUsers(prev => prev.map(u => u.id === data.id ? data : u));
+  } catch (err: any) {
+    alert(err.response?.data?.message || 'Ошибка обновления пользователя');
+  }
+};
+
+const handleDeleteUser = async (id: number) => {
+  try {
+    await deleteUser(id);
+    setUsers(prev => prev.filter(u => u.id !== id));
+  } catch (err: any) {
+    alert(err.response?.data?.message || 'Ошибка удаления пользователя');
+  }
+};
+
+// ---------------- Products ----------------
+const handleAddProduct = async (product: Partial<Product>) => {
+  try {
+    const { data } = await createProduct(product);
+    setProducts(prev => [...prev, data]);
+  } catch (err: any) {
+    alert(err.response?.data?.message || 'Ошибка добавления товара');
+  }
+};
+
+const handleUpdateProduct = async (product: Partial<Product> & { id: number }) => {
+  try {
+    const { data } = await updateProduct(product.id, product);
+    setProducts(prev => prev.map(p => p.id === data.id ? data : p));
+  } catch (err: any) {
+    alert(err.response?.data?.message || 'Ошибка обновления товара');
+  }
+};
+
+const handleDeleteProduct = async (id: number) => {
+  try {
+    await deleteProduct(id);
+    setProducts(prev => prev.filter(p => p.id !== id));
+  } catch (err: any) {
+    alert(err.response?.data?.message || 'Ошибка удаления товара');
+  }
+};
+
+// ---------------- Orders ----------------
+const handleCreateOrder = async (order: Partial<Order>) => {
+  try {
+    const { data } = await createOrder(order);
+    setOrders(prev => [data, ...prev]);
+    setCart([]);
+    setCartComment('');
+    alert('Заказ успешно создан!');
+    setCurrentView('orders');
+  } catch (err: any) {
+    alert(err.response?.data?.message || 'Ошибка создания заказа');
+  }
+};
+
+const handleUpdateOrder = async (order: Partial<Order> & { id: number }) => {
+  try {
+    const { data } = await updateOrder(order.id, order);
+    setOrders(prev => prev.map(o => o.id === data.id ? data : o));
+  } catch (err: any) {
+    alert(err.response?.data?.message || 'Ошибка обновления заказа');
+  }
+};
+
+const handleDeleteOrder = async (id: number) => {
+  try {
+    await deleteOrder(id);
+    setOrders(prev => prev.filter(o => o.id !== id));
+  } catch (err: any) {
+    alert(err.response?.data?.message || 'Ошибка удаления заказа');
+  }
+};
+
+// ---------------- Reviews ----------------
+const handleDeleteReview = async (id: number) => {
+  try {
+    await deleteReview(id);
+    setReviews(prev => prev.filter(r => r.id !== id));
+  } catch (err: any) {
+    alert(err.response?.data?.message || 'Ошибка удаления отзыва');
+  }
+};
+
+const handleReplyReview = async (id: number, text: string) => {
+  try {
+    const { data } = await updateReview(id, { reply: text });
+    setReviews(prev => prev.map(r => r.id === data.id ? data : r));
+  } catch (err: any) {
+    alert(err.response?.data?.message || 'Ошибка ответа на отзыв');
+  }
+};
+
+// ---------------- Order Comments ----------------
+const handleAddOrderComment = async (orderId: number, text: string, isInternal: boolean, author: string) => {
+  try {
+    const order = orders.find(o => o.id === orderId);
+    if (!order) throw new Error('Заказ не найден');
+
+    const newComment = {
+      author,
+      text,
+      isInternal,
+      createdAt: new Date().toISOString()
+    };
+
+    const updatedOrder = await updateOrder(orderId, { ...order, comments: [...order.comments, newComment] });
+    setOrders(prev => prev.map(o => o.id === orderId ? updatedOrder.data : o));
+  } catch (err: any) {
+    alert(err.response?.data?.message || 'Ошибка добавления комментария');
+  }
+};
