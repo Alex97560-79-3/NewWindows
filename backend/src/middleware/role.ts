@@ -8,5 +8,6 @@ export const requireRole = (roles: string | string[]) => {
     if (!userRole) return res.status(403).json({ error: 'No role' });
     if (!allowed.includes(userRole)) return res.status(403).json({ error: 'Forbidden: insufficient role' });
     next();
+    console.log(req.user)
   };
 };

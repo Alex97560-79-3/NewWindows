@@ -176,152 +176,70 @@ export const AssemblerDashboard: React.FC<AssemblerDashboardProps> = ({
 
     console.log(orders);
 
-    return (
-        <div className="bg-white rounded-lg shadow-lg border border-slate-200 p-6">
-            <div className="flex justify-between items-center mb-6">
-                <h2 className="text-2xl font-bold text-slate-800">Рабочее место сборщика</h2>
-                <div className="flex gap-4">
-                     <div className="text-sm text-slate-500 self-center">
-                        Мои заказы: <span className="font-bold text-blue-600">{myOrders.length}</span>
+return (
+    <div className="space-y-4">
+    {(orders || []).map(order => (
+        <div key={order.id} className="border border-slate-200 rounded-lg p-4 bg-slate-50">
+            <div className="flex justify-between mb-4">
+                <div>
+                    <div className="font-mono text-lg font-bold text-slate-700">Заказ #{order.id}</div>
+                    <div className="text-xs text-slate-500">{order.created_at}</div>
+                    <div className="text-sm font-medium mt-1">{order.customer_name}</div>
+                </div>
+                <div className="text-xs text-slate-500">Статус: {order.status}</div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="bg-white rounded border border-slate-200 p-3">
+                    <div className="text-xs font-bold text-slate-400 mb-2 uppercase">Состав заказа</div>
+                    <ul className="space-y-2 max-h-40 overflow-y-auto">
+                        {(order.items || []).map(item => (
+                            <li key={item.id ?? Math.random()} className="flex justify-between items-center text-sm border-b border-slate-100 pb-1 last:border-0">
+                                <span className="truncate pr-2">{item.name || 'Без названия'}</span>
+                                <span className="font-bold">{item.quantity}</span>
+                            </li>
+                        ))}
+                    </ul>
+                </div>
+
+                <div className="bg-white rounded border border-slate-200 p-3 flex flex-col">
+                    <div className="text-xs font-bold text-slate-400 mb-2 uppercase">Чат по заказу</div>
+                    <div className="flex-1 overflow-y-auto max-h-32 space-y-2 mb-2">
+                        {(order.comments || []).map(c => (
+                            <div key={c.id} className={`p-1.5 rounded text-[10px] ${c.isInternal ? 'bg-yellow-50 text-slate-700' : 'bg-blue-50 text-blue-900'}`}>
+                                <span className="font-bold mr-1">{c.author}:</span>
+                                {c.text}
+                            </div>
+                        ))}
+                    </div>
+                    <div className="flex gap-1">
+                        <input
+                            value=""
+                            readOnly
+                            className="flex-1 bg-white border border-slate-300 rounded text-xs px-2 py-1"
+                            placeholder="Комментарий..."
+                        />
+                        <select className="bg-white border border-slate-300 rounded px-1 py-1 text-[10px]" disabled>
+                            <option>Внутр.</option>
+                            <option>Клиенту</option>
+                        </select>
+                        <button className="bg-blue-500 text-white px-2 rounded cursor-not-allowed">
+                            <i className="fa-solid fa-paper-plane text-xs"></i>
+                        </button>
                     </div>
                 </div>
             </div>
 
-            {myOrders.length === 0 ? (
-                <div className="text-center py-10 bg-slate-50 rounded-lg">
-                    <i className="fa-solid fa-clipboard-check text-4xl text-slate-300 mb-3"></i>
-                    <p className="text-slate-500">Вам еще не назначены заказы.</p>
-                </div>
-            ) : (
-                <div className="space-y-4">
-                    {myOrders.map(order => (
-                        <div key={order.id} className="border border-slate-200 rounded-lg p-4 hover:shadow-md transition-shadow bg-slate-50">
-                            {/* Action Bar for New Orders */}
-                            {(!order.acceptanceStatus || order.acceptanceStatus === 'Pending') && (
-                                <div className="bg-yellow-50 border border-yellow-200 rounded p-3 mb-4 flex justify-between items-center">
-                                    <span className="text-sm text-yellow-800 font-bold">Новое назначение!</span>
-                                    <div className="flex gap-2">
-                                        <button 
-                                            onClick={() => handleAcceptance(order, 'Accepted')}
-                                            className="px-3 py-1 bg-green-600 text-white rounded text-sm hover:bg-green-700"
-                                        >
-                                            Принять
-                                        </button>
-                                        <button 
-                                            onClick={() => handleAcceptance(order, 'Rejected')}
-                                            className="px-3 py-1 bg-red-500 text-white rounded text-sm hover:bg-red-600"
-                                        >
-                                            Отклонить
-                                        </button>
-                                    </div>
-                                </div>
-                            )}
-
-                            <div className="flex justify-between items-start mb-4">
-                                <div>
-                                    <div className="font-mono text-lg font-bold text-slate-700">Заказ #{order.id}</div>
-                                    <div className="text-xs text-slate-500">{order.createdAt}</div>
-                                    <div className="text-sm font-medium mt-1">{order.customerName}</div>
-                                </div>
-                                <div className="flex flex-col items-end gap-2">
-                                    <select 
-                                        value={order.status}
-                                        onChange={(e) => onUpdateStatus(order.id, e.target.value as any)}
-                                        disabled={order.acceptanceStatus !== 'Accepted'}
-                                        className="bg-white text-xs border border-slate-300 rounded px-2 py-1 font-bold disabled:opacity-50"
-                                    >
-                                        <option value="Pending">{STATUS_TRANSLATIONS['Pending']}</option>
-                                        <option value="Processing">{STATUS_TRANSLATIONS['Processing']}</option>
-                                        <option value="Completed">{STATUS_TRANSLATIONS['Completed']}</option>
-                                    </select>
-                                    <div className="flex items-center gap-2">
-                                        <span className="text-xs text-slate-500">Срок:</span>
-                                        <input 
-                                            type="date"
-                                            value={order.estimatedCompletionDate || ''}
-                                            onChange={(e) => handleDateChange(order, e.target.value)}
-                                            className="bg-white border border-slate-300 rounded px-2 py-1 text-xs"
-                                        />
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                {/* Composition */}
-                                <div className="bg-white rounded border border-slate-200 p-3">
-                                    <div className="text-xs font-bold text-slate-400 mb-2 uppercase flex justify-between">
-                                        <span>Состав заказа</span>
-                                        <span className="text-slate-300 text-[10px]">(Редактирование)</span>
-                                    </div>
-                                    <ul className="space-y-2 max-h-40 overflow-y-auto">
-                                        {orders.items.map(item => (
-                                            <li key={item.id} className="flex justify-between items-center text-sm border-b border-slate-100 pb-1 last:border-0">
-                                                <span className="truncate pr-2">{item.name}</span>
-                                                <div className="flex items-center gap-1 flex-shrink-0">
-                                                    <button onClick={() => handleUpdateQuantity(order, item.id, -1)} className="w-5 h-5 bg-slate-100 rounded text-xs hover:bg-slate-200">-</button>
-                                                    <span className="font-bold w-4 text-center">{item.quantity}</span>
-                                                    <button onClick={() => handleUpdateQuantity(order, item.id, 1)} className="w-5 h-5 bg-slate-100 rounded text-xs hover:bg-slate-200">+</button>
-                                                </div>
-                                            </li>
-                                        ))}
-                                    </ul>
-                                </div>
-
-                                {/* Comments */}
-                                <div className="bg-white rounded border border-slate-200 p-3 flex flex-col">
-                                    <div className="text-xs font-bold text-slate-400 mb-2 uppercase">Чат по заказу</div>
-                                    <div className="flex-1 overflow-y-auto max-h-32 space-y-2 mb-2">
-                                        {order.comments.map(c => (
-                                            <div key={c.id} className={`p-1.5 rounded text-[10px] ${c.isInternal ? 'bg-yellow-50 text-slate-700' : 'bg-blue-50 text-blue-900'}`}>
-                                                <span className="font-bold mr-1">{c.author}:</span>
-                                                {c.text}
-                                            </div>
-                                        ))}
-                                    </div>
-                                    <div className="flex gap-1">
-                                        <input 
-                                            value={editingOrderId === order.id ? commentText : ''}
-                                            onChange={(e) => { setEditingOrderId(order.id); setCommentText(e.target.value); }}
-                                            className="flex-1 bg-white border border-slate-300 rounded text-xs px-2 py-1" 
-                                            placeholder="Комментарий..." 
-                                        />
-                                        <select 
-                                            value={commentType} 
-                                            onChange={(e) => setCommentType(e.target.value as any)}
-                                            className="bg-white border border-slate-300 rounded px-1 py-1 text-[10px]"
-                                        >
-                                            <option value="internal">Внутр.</option>
-                                            <option value="public">Клиенту</option>
-                                        </select>
-                                        <button onClick={() => handleAddComment(order.id)} className="bg-blue-500 text-white px-2 rounded hover:bg-blue-600">
-                                            <i className="fa-solid fa-paper-plane text-xs"></i>
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div className="flex justify-end gap-3 mt-4">
-                                <button 
-                                    onClick={() => handlePrintAssemblySheet(order)}
-                                    className="px-4 py-2 bg-white border border-slate-300 text-slate-700 rounded-lg text-sm font-medium hover:bg-slate-50"
-                                >
-                                    <i className="fa-solid fa-print mr-2"></i>
-                                    Лист сборки
-                                </button>
-                                {order.status !== 'Completed' && order.acceptanceStatus === 'Accepted' && (
-                                    <button 
-                                        onClick={() => onUpdateStatus(order.id, 'Completed')}
-                                        className="px-4 py-2 bg-green-600 text-white rounded-lg text-sm font-medium hover:bg-green-700 shadow-sm"
-                                    >
-                                        <i className="fa-solid fa-check mr-2"></i>
-                                        Готово к отгрузке
-                                    </button>
-                                )}
-                            </div>
-                        </div>
-                    ))}
-                </div>
-            )}
+            <div className="flex justify-end gap-3 mt-4">
+                <button className="px-4 py-2 bg-white border border-slate-300 text-slate-700 rounded-lg text-sm font-medium">
+                    <i className="fa-solid fa-print mr-2"></i>Лист сборки
+                </button>
+                <button className="px-4 py-2 bg-green-600 text-white rounded-lg text-sm font-medium cursor-not-allowed">
+                    <i className="fa-solid fa-check mr-2"></i>Готово к отгрузке
+                </button>
+            </div>
         </div>
-    );
+    ))}
+</div>
+);
 };

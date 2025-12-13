@@ -169,8 +169,8 @@ export const ManagerDashboard: React.FC<ManagerDashboardProps> = ({
                                 <label className="block text-xs font-medium text-slate-700 mb-1">Цена (₽)</label>
                                 <input 
                                     type="number"
-                                    value={editingProduct.basePrice}
-                                    onChange={e => setEditingProduct({...editingProduct, basePrice: Number(e.target.value)})}
+                                    value={editingProduct.base_price}
+                                    onChange={e => setEditingProduct({...editingProduct, base_price: Number(e.target.value)})}
                                     className="w-full bg-white border border-slate-300 rounded p-2 text-sm"
                                 />
                             </div>
@@ -188,8 +188,8 @@ export const ManagerDashboard: React.FC<ManagerDashboardProps> = ({
                             <label className="block text-xs font-medium text-slate-700 mb-1">Ссылка на изображение</label>
                             <input 
                                 type="text"
-                                value={editingProduct.imageUrl || ''}
-                                onChange={e => setEditingProduct({...editingProduct, imageUrl: e.target.value})}
+                                value={editingProduct.image_url || ''}
+                                onChange={e => setEditingProduct({...editingProduct, image_url: e.target.value})}
                                 className="w-full bg-white border border-slate-300 rounded p-2 text-sm"
                                 placeholder="https://..."
                             />
@@ -218,11 +218,11 @@ export const ManagerDashboard: React.FC<ManagerDashboardProps> = ({
                     {products.map(product => (
                         <div key={product.id} className="flex flex-col sm:flex-row sm:items-center justify-between p-4 bg-slate-50 rounded-lg border border-slate-100 gap-4">
                             <div className="flex items-center space-x-4">
-                                <img src={product.imageUrl} alt="" className="w-12 h-12 rounded object-cover" />
+                                <img src={product.image_url} alt="" className="w-12 h-12 rounded object-cover" />
                                 <div>
                                     <h4 className="font-semibold text-slate-800">{product.name}</h4>
                                     <div className="text-xs text-slate-500">
-                                        {product.basePrice} ₽ {product.discount ? `(-${product.discount}%)` : ''}
+                                        {product.base_price} ₽ {product.discount ? `(-${product.discount}%)` : ''}
                                     </div>
                                 </div>
                             </div>
