@@ -69,7 +69,7 @@ export const ProductDetails: React.FC<ProductDetailsProps> = ({
                                 -{product.discount}%
                             </span>
                         )}
-                        {!([UserRole.ADMIN, UserRole.MANAGER, UserRole.ASSEMBLER].includes(userRole)) && (
+                        {!([UserRole.admin, UserRole.manager, UserRole.assembler].includes(userRole)) && (
                             <button className="absolute top-4 right-4 text-slate-300 hover:text-red-500 transition-colors bg-white rounded-full p-2 shadow-sm">
                                 <i className="fa-solid fa-heart text-xl"></i>
                             </button>
@@ -150,7 +150,7 @@ export const ProductDetails: React.FC<ProductDetailsProps> = ({
                             </span>
                         </div>
 
-                        {[UserRole.ADMIN, UserRole.MANAGER].includes(userRole) ? (
+                        {[UserRole.admin, UserRole.manager].includes(userRole) ? (
                              <div className="space-y-3 mb-6">
                                 <button 
                                     onClick={() => onEdit?.(product)}
@@ -167,7 +167,7 @@ export const ProductDetails: React.FC<ProductDetailsProps> = ({
                                     Удалить товар
                                 </button>
                             </div>
-                        ) : userRole === UserRole.ASSEMBLER ? (
+                        ) : userRole === UserRole.assembler ? (
                             <div className="bg-slate-50 p-4 rounded-xl text-center text-slate-500 text-sm mb-6">
                                 Просмотр товара в режиме сборщика
                             </div>
@@ -230,7 +230,7 @@ export const ProductDetails: React.FC<ProductDetailsProps> = ({
                             </div>
                             <p className="text-slate-700 leading-relaxed">{review.text}</p>
                             
-                            {/* Manager Reply Display */}
+                            {/* manager Reply Display */}
                             {review.reply && (
                                 <div className="mt-4 bg-slate-50 p-4 rounded-lg border-l-4 border-blue-500">
                                     <div className="text-xs font-bold text-blue-600 mb-1">Ответ магазина</div>

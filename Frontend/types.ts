@@ -86,11 +86,3 @@ export interface Review {
   reply?: string;
   created_at?: string;
 }
-
-export enum UserRole {
-  ADMIN = 'admin',
-  MANAGER = 'manager',
-  ASSEMBLER = 'assembler',
-  CLIENT = 'client',
-  GUEST = 'guest'
-}
