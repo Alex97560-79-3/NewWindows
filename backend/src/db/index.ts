@@ -3,8 +3,13 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 const db = knex({
-  client: 'pg',
-  connection: process.env.DATABASE_URL
+  client: 'mysql2',
+  connection: {
+    host: 'localhost',
+    user: 'root',
+    password: 'root',
+    database: 'newwindows'
+  }
 });
 
 export default db;
