@@ -174,7 +174,8 @@ export const AssemblerDashboard: React.FC<AssemblerDashboardProps> = ({
         }
     };
 
-    console.log(orders);
+    console.log(orders);    
+    console.log(orders.items);
 
 return (
     <div className="space-y-4">
@@ -194,10 +195,13 @@ return (
                     <div className="text-xs font-bold text-slate-400 mb-2 uppercase">Состав заказа</div>
                     <ul className="space-y-2 max-h-40 overflow-y-auto">
                         {(order.items || []).map(item => (
-                            <li key={item.id ?? Math.random()} className="flex justify-between items-center text-sm border-b border-slate-100 pb-1 last:border-0">
-                                <span className="truncate pr-2">{item.name || 'Без названия'}</span>
-                                <span className="font-bold">{item.quantity}</span>
-                            </li>
+                            <div>
+                                <li key={item.id} className="flex justify-between items-center">
+                                    <div>
+                                        <div className="font-medium text-slate-700">{item.name}</div>
+                                    </div>
+                                </li>
+                            </div>
                         ))}
                     </ul>
                 </div>

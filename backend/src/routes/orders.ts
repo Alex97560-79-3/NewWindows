@@ -27,6 +27,32 @@ router.get('/', authMiddleware, async (req: AuthRequest, res) => {
   }
 });
 
+// GET /api/order_items
+router.get('/', async (req: AuthRequest, res) => {
+  try {
+    const role = req.user?.role;
+
+    if (role === 'admin' || role === 'manager' || role === 'assembler') {
+      const order_items = await db<OrderItem>('order_items').select('*');
+      res.json({ data: order_items });
+    } else if (role === 'client') {
+      const order_items = await db<OrderItem>('order_items')
+        .join('orders', 'order_items.order_id', 'orders.id')
+        .where('orders.customer_id', req.user.id)
+        .select('order_items.*');
+      res.json({ data: order_items });
+    } else {
+      const order_items = await db<OrderItem>('order_items').select('*'); 
+      res.json({ data: order_items });
+    }
+  } catch (err: any) {
+    console.error(err);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+
+
 
   // GET  /:id
   router.get('/:id', authMiddleware, async (req: AuthRequest, res) => {
