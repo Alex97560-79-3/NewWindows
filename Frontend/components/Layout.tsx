@@ -1,10 +1,8 @@
-
 import React, { useState, useRef, useEffect } from 'react';
-import { UserRole } from '../types';
 
 interface LayoutProps {
     children: React.ReactNode;
-    currentRole: UserRole;
+    currentRole: string;
     cartCount: number;
     favoritesCount?: number;
     onNavigate: (view: string) => void;
@@ -129,7 +127,7 @@ export const Layout: React.FC<LayoutProps> = ({
                                         {avatarUrl ? (
                                             <img src={avatarUrl} alt={userName} className="w-6 h-6 rounded-full object-cover mb-1 border border-blue-400" />
                                         ) : (
-                                            <i className={`fa-regular ${currentRole === UserRole.ADMIN ? 'fa-user-shield text-yellow-300' : currentRole === UserRole.ASSEMBLER ? 'fa-helmet-safety text-orange-300' : currentRole === UserRole.MANAGER ? 'fa-user-tie text-purple-300' : 'fa-user'} text-xl mb-1 group-hover:scale-110 transition-transform`}></i>
+                                            <i className={`fa-regular ${currentRole === 'admin' ? 'fa-user-shield text-yellow-300' : currentRole === 'assembler' ? 'fa-helmet-safety text-orange-300' : currentRole === 'manager' ? 'fa-user-tie text-purple-300' : 'fa-user'} text-xl mb-1 group-hover:scale-110 transition-transform`}></i>
                                         )}
                                         <span className="text-[10px] font-medium max-w-[60px] truncate hidden md:inline">{userName}</span>
                                         <button 
@@ -147,19 +145,19 @@ export const Layout: React.FC<LayoutProps> = ({
                                 )}
                                 
                                 {/* Role Based Links in Header */}
-                                {currentRole === UserRole.ADMIN && (
+                                {currentRole === 'admin' && (
                                     <div className="flex flex-col items-center cursor-pointer group" onClick={() => onNavigate('admin-products')}>
                                         <i className="fa-solid fa-screwdriver-wrench text-xl mb-1 group-hover:scale-110 transition-transform text-white"></i>
                                         <span className="text-[10px] font-medium hidden md:inline">Админка</span>
                                     </div>
                                 )}
-                                {currentRole === UserRole.MANAGER && (
+                                {currentRole === 'manager' && (
                                     <div className="flex flex-col items-center cursor-pointer group" onClick={() => onNavigate('manager-dashboard')}>
                                         <i className="fa-solid fa-briefcase text-xl mb-1 group-hover:scale-110 transition-transform text-white"></i>
                                         <span className="text-[10px] font-medium hidden md:inline">Кабинет</span>
                                     </div>
                                 )}
-                                {currentRole === UserRole.ASSEMBLER && (
+                                {currentRole === 'assembler' && (
                                     <div className="flex flex-col items-center cursor-pointer group" onClick={() => onNavigate('assembler-dashboard')}>
                                         <i className="fa-solid fa-hammer text-xl mb-1 group-hover:scale-110 transition-transform text-white"></i>
                                         <span className="text-[10px] font-medium hidden md:inline">Задания</span>
@@ -167,7 +165,7 @@ export const Layout: React.FC<LayoutProps> = ({
                                 )}
 
                                 {/* Client Only Links */}
-                                {[UserRole.CLIENT, UserRole.GUEST].includes(currentRole) && (
+                                {['client', 'guest'].includes(currentRole) && (
                                     <>
                                         <div className="flex flex-col items-center cursor-pointer group" onClick={() => onNavigate('orders')}>
                                             <i className="fa-solid fa-box-open text-xl mb-1 group-hover:scale-110 transition-transform"></i>
@@ -249,13 +247,6 @@ export const Layout: React.FC<LayoutProps> = ({
             <main className="flex-grow w-full max-w-[1400px] mx-auto px-4 xl:px-8 py-4 md:py-6">
                 {children}
             </main>
-
-            {/* Simple Footer */}
-            <footer className="bg-white border-t border-slate-200 mt-auto">
-                <div className="max-w-[1400px] mx-auto py-8 px-4 text-center text-slate-400 text-sm">
-                    &copy; 2025 Новые Окна Marketplace. Все права защищены.
-                </div>
-            </footer>
         </div>
     );
 };

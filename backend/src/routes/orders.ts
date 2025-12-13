@@ -24,22 +24,22 @@ router.get('/', authMiddleware, async (req: AuthRequest, res) => {
   }
 });
 
-// GET /api/orders/:id
-router.get('/:id', authMiddleware, async (req: AuthRequest, res) => {
-  try {
-    const id = Number(req.params.id);
-    const order = await db<Order>('orders').where({ id }).first();
-    if (!order) return res.status(404).json({ error: 'Not found' });
-    const items = await db<OrderItem>('order_items').where({ order_id: id });
-    const comments = await db<OrderComment>('order_comments')
-      .where({ order_id: id })
-      .orderBy('created_at', 'asc');
-    res.json({ data: { ...order, items, comments } });
-  } catch (err: any) {
-    console.error(err);
-    res.status(500).json({ error: 'Server error' });
-  }
-});
+  // GET  /:id
+  router.get('/:id', authMiddleware, async (req: AuthRequest, res) => {
+    try {
+      const id = Number(req.params.id);
+      const order = await db<Order>('orders').where({ id }).first();
+      if (!order) return res.status(404).json({ error: 'Not found' });
+      const items = await db<OrderItem>('order_items').where({ order_id: id });
+      const comments = await db<OrderComment>('order_comments')
+        .where({ order_id: id })
+        .orderBy('created_at', 'asc');
+      res.json({ data: { ...order, items, comments } });
+    } catch (err: any) {
+      console.error(err);
+      res.status(500).json({ error: 'Server error' });
+    }
+  });
 
 // POST /api/orders
 router.post('/', async (req, res) => {

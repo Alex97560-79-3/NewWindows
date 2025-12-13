@@ -19,7 +19,7 @@ import {
   deleteUser,
   deleteReview,
   updateReview
-} from './services/api';
+} from './services/Api.ts';
 
 import { Layout } from './components/Layout';
 import { ProductCard } from './components/ProductCard';
@@ -31,8 +31,7 @@ import { ManagerDashboard } from './components/ManagerDashboard';
 import { AssemblerDashboard } from './components/AssemblerDashboard';
 import { ProductDetails } from './components/ProductDetails';
 
-
-import { User, Product, Order, Review, UserRole } from './types';
+import { User, Product, Order, Review } from './types';
 import { CATEGORIES } from './constants';
 
 const App: React.FC = () => {
@@ -123,9 +122,9 @@ const App: React.FC = () => {
       setIsLoggedIn(true);
       setCurrentUser(user);
 
-      if (user.role === UserRole.ADMIN) setCurrentView('admin-products');
-      else if (user.role === UserRole.MANAGER) setCurrentView('manager-dashboard');
-      else if (user.role === UserRole.ASSEMBLER) setCurrentView('assembler-dashboard');
+      if (user.role === 'admin') setCurrentView('admin-products');
+      else if (user.role === 'manager') setCurrentView('manager-dashboard');
+      else if (user.role === 'assembler') setCurrentView('assembler-dashboard');
       else setCurrentView('catalog');
 
     } catch (err) {
@@ -170,7 +169,7 @@ const App: React.FC = () => {
   };
 
   const handleUpdateProduct = async (product: Product) => {
-    const res = await updateProduct(product.id, product);
+    const res = await updateProduct(product.id!, product);
     setProducts(prev => prev.map(p => p.id === product.id ? res.data : p));
   };
 
@@ -188,7 +187,7 @@ const App: React.FC = () => {
   };
 
   const handleUpdateUser = async (user: User) => {
-    const res = await updateUser(user.id, user);
+    const res = await updateUser(user.id!, user);
     setUsers(prev => prev.map(u => u.id === user.id ? res.data : u));
   };
 
@@ -205,13 +204,13 @@ const App: React.FC = () => {
 
     const newOrder = {
       customerName: currentUser.name,
-      customerPhone: currentUser.phone || '+79990000000',
+      customerPhone: (currentUser as any).phone || '+79990000000',
       items: cart.map(item => ({
-        productId: item.id,
-        quantity: item.quantity,
-        basePrice: item.basePrice,
+        productId: item.id!,
+        quantity: (item as any).quantity || 1,
+        basePrice: item.base_price,
         name: item.name,
-        imageUrl: item.imageUrl
+        imageUrl: item.image_url
       })),
       comments: cartComment
         ? [{ author: currentUser.name, text: cartComment, isInternal: false }]
@@ -257,10 +256,10 @@ const App: React.FC = () => {
       const exist = prev.find(p => p.id === product.id);
       if (exist) {
         return prev.map(p =>
-          p.id === product.id ? { ...p, quantity: p.quantity + 1 } : p
+          p.id === product.id ? { ...p, quantity: (p as any).quantity + 1 } : p
         );
       }
-      return [...prev, { ...product, quantity: 1 }];
+      return [...prev, { ...product, quantity: 1 } as any];
     });
   };
 
@@ -279,21 +278,62 @@ const App: React.FC = () => {
   ---------------------------------------- */
   return (
     <Layout
-      currentRole={currentUser?.role || UserRole.GUEST}
-      cartCount={cart.reduce((acc, item) => acc + item.quantity, 0)}
+      currentRole={currentUser?.role || 'guest'}
+      cartCount={cart.reduce((acc, item) => acc + ((item as any).quantity || 0), 0)}
       favoritesCount={favorites.length}
       onNavigate={setCurrentView}
       currentView={currentView}
       onLogout={handleLogout}
       isLoggedIn={isLoggedIn}
       userName={currentUser?.name}
-      avatarUrl={currentUser?.avatarUrl}
+      avatarUrl={currentUser?.avatar_url}
       onCategorySelect={setSelectedCategoryId}
       onToggleSale={() => setIsSaleOnly(!isSaleOnly)}
     >
+      {currentView === 'login' && (
+        <Login 
+          onLogin={(name, role, token) => {
+            setIsLoggedIn(true);
+            setCurrentUser({ name, role } as User);
+            localStorage.setItem('token', token);
+            setAuthToken(token);
+            
+            if (role === 'admin') setCurrentView('admin-products');
+            else if (role === 'manager') setCurrentView('manager-dashboard');
+            else if (role === 'assembler') setCurrentView('assembler-dashboard');
+            else setCurrentView('catalog');
+          }}
+          onNavigateToRegister={() => setCurrentView('register')}
+        />
+      )}
+
+      {currentView === 'register' && (
+        <Register 
+          onRegister={(name, role, token) => {
+            setIsLoggedIn(true);
+            setCurrentUser({ name, role } as User);
+            localStorage.setItem('token', token);
+            setAuthToken(token);
+            setCurrentView('catalog');
+          }}
+          onNavigateToLogin={() => setCurrentView('login')}
+        />
+      )}
+
+      {currentView === 'catalog' && (
+        <div className="text-center py-20">
+          <h1 className="text-4xl font-bold text-slate-800 mb-4">
+            Добро пожаловать в НовыеОкна
+          </h1>
+          <p className="text-slate-600">
+            {isLoggedIn ? `Привет, ${currentUser?.name}!` : 'Войдите чтобы начать покупки'}
+          </p>
+        </div>
+      )}
+
       {/* 
-        TODO: Вставьте сюда ваши функции рендера 
-        renderCatalog(), renderCart(), renderFavorites(), renderOrders(), renderProfile(), 
+        TODO: Вставьте сюда остальные view
+        renderCart(), renderFavorites(), renderOrders(), renderProfile(), 
         renderAdminPanel(), renderManagerDashboard(), renderAssemblerDashboard() и т.д.
       */}
     </Layout>

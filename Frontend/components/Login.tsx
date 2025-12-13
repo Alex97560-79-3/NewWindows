@@ -1,10 +1,8 @@
-
 import React, { useState } from 'react';
-import { UserRole } from '../types';
-import { MOCK_USERS, ROLE_TRANSLATIONS } from '../constants';
+import { login as apiLogin, setAuthToken } from '../services/Api.ts';
 
 interface LoginProps {
-    onLogin: (name: string, role: UserRole) => void;
+    onLogin: (name: string, role: string, token: string) => void;
     onNavigateToRegister: () => void;
 }
 
@@ -12,8 +10,9 @@ export const Login: React.FC<LoginProps> = ({ onLogin, onNavigateToRegister }) =
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
+    const [loading, setLoading] = useState(false);
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setError('');
 
@@ -22,25 +21,31 @@ export const Login: React.FC<LoginProps> = ({ onLogin, onNavigateToRegister }) =
             return;
         }
 
-        const user = MOCK_USERS.find(u => u.email === email && u.password === password);
+        setLoading(true);
 
-        if (user) {
-            onLogin(user.name, user.role);
-        } else {
-             setError('Неверный email или пароль (используйте тестовые данные справа)');
+        try {
+            // API теперь возвращает { token, user } напрямую из res.data.data
+            const { token, user } = await apiLogin(email, password);
+            
+            if (token && user) {
+                setAuthToken(token);
+                onLogin(user.name, user.role, token);
+            } else {
+                setError('Неверный ответ от сервера');
+            }
+        } catch (err: any) {
+            console.error('Login error:', err);
+            const errorMessage = err.response?.data?.message || err.message || 'Ошибка авторизации';
+            setError(errorMessage);
+        } finally {
+            setLoading(false);
         }
     };
 
-    const handleQuickFill = (userIndex: number) => {
-        const user = MOCK_USERS[userIndex];
-        setEmail(user.email);
-        setPassword(user.password || '123');
-    };
-
     return (
-        <div className="max-w-4xl mx-auto flex flex-col md:flex-row gap-8 mt-10 items-start animate-fade-in-up">
+        <div className="max-w-md mx-auto mt-10 animate-fade-in-up">
             {/* Login Form */}
-            <div className="flex-1 w-full bg-white rounded-xl shadow-lg border border-slate-100 overflow-hidden">
+            <div className="w-full bg-white rounded-xl shadow-lg border border-slate-100 overflow-hidden">
                 <div className="bg-blue-600 p-6 text-center">
                     <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-white/20 mb-4 text-white">
                         <i className="fa-solid fa-user-lock text-xl"></i>
@@ -63,7 +68,8 @@ export const Login: React.FC<LoginProps> = ({ onLogin, onNavigateToRegister }) =
                             type="email" 
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
-                            className="w-full px-4 py-2 bg-white border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
+                            disabled={loading}
+                            className="w-full px-4 py-2 bg-white border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all disabled:opacity-50"
                             placeholder="name@example.com"
                         />
                     </div>
@@ -74,16 +80,25 @@ export const Login: React.FC<LoginProps> = ({ onLogin, onNavigateToRegister }) =
                             type="password" 
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
-                            className="w-full px-4 py-2 bg-white border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
+                            disabled={loading}
+                            className="w-full px-4 py-2 bg-white border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all disabled:opacity-50"
                             placeholder="••••••••"
                         />
                     </div>
 
                     <button 
                         type="submit" 
-                        className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-lg shadow-lg hover:shadow-blue-200 transition-all"
+                        disabled={loading}
+                        className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-lg shadow-lg hover:shadow-blue-200 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
                     >
-                        Войти
+                        {loading ? (
+                            <>
+                                <i className="fa-solid fa-spinner fa-spin mr-2"></i>
+                                Вход...
+                            </>
+                        ) : (
+                            'Войти'
+                        )}
                     </button>
                 </form>
                 
@@ -92,35 +107,6 @@ export const Login: React.FC<LoginProps> = ({ onLogin, onNavigateToRegister }) =
                         Нет аккаунта? <button onClick={onNavigateToRegister} className="text-blue-600 font-medium hover:underline">Регистрация</button>
                     </p>
                 </div>
-            </div>
-
-            {/* Test Credentials Helper */}
-            <div className="w-full md:w-80 bg-blue-50 rounded-xl border border-blue-100 p-6">
-                <h3 className="font-bold text-slate-800 mb-4 flex items-center">
-                    <i className="fa-solid fa-key text-blue-500 mr-2"></i>
-                    Тестовый доступ
-                </h3>
-                <div className="space-y-3">
-                    {MOCK_USERS.slice(0, 4).map((user, idx) => (
-                        <div 
-                            key={idx} 
-                            onClick={() => handleQuickFill(idx)}
-                            className="bg-white p-3 rounded-lg border border-blue-100 cursor-pointer hover:shadow-md hover:border-blue-300 transition-all group"
-                        >
-                            <div className="flex justify-between items-center mb-1">
-                                <span className="font-bold text-xs uppercase text-slate-500 group-hover:text-blue-600">
-                                    {ROLE_TRANSLATIONS[user.role]}
-                                </span>
-                                <i className="fa-solid fa-arrow-right-to-bracket text-slate-300 group-hover:text-blue-500"></i>
-                            </div>
-                            <div className="text-sm font-medium text-slate-800">{user.email}</div>
-                            <div className="text-xs text-slate-400">Пароль: {user.password}</div>
-                        </div>
-                    ))}
-                </div>
-                <p className="text-xs text-slate-400 mt-4 leading-relaxed">
-                    Нажмите на карточку пользователя, чтобы автоматически заполнить форму входа.
-                </p>
             </div>
         </div>
     );

@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { Product, Order, Category, User, UserRole } from '../types';
+import { Product, Order, Category, User} from '../types';
 import { ROLE_TRANSLATIONS, STATUS_TRANSLATIONS } from '../constants';
 
 interface AdminDashboardProps {

@@ -1,9 +1,8 @@
-
 import React, { useState } from 'react';
-import { UserRole } from '../types';
+import { register as apiRegister, setAuthToken } from '../services/Api.ts';
 
 interface RegisterProps {
-    onRegister: (name: string, role: UserRole) => void;
+    onRegister: (name: string, role: string, token: string) => void;
     onNavigateToLogin: () => void;
 }
 
@@ -13,8 +12,9 @@ export const Register: React.FC<RegisterProps> = ({ onRegister, onNavigateToLogi
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
     const [error, setError] = useState('');
+    const [loading, setLoading] = useState(false);
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setError('');
 
@@ -28,9 +28,30 @@ export const Register: React.FC<RegisterProps> = ({ onRegister, onNavigateToLogi
             return;
         }
 
-        // Mock registration logic
-        const role = email.toLowerCase().includes('admin') ? UserRole.ADMIN : UserRole.GUEST;
-        onRegister(name, role);
+        if (password.length < 6) {
+            setError('Пароль должен содержать минимум 6 символов');
+            return;
+        }
+
+        setLoading(true);
+
+        try {
+            // API теперь возвращает { token, user } напрямую из res.data.data
+            const { token, user } = await apiRegister(name, email, password);
+            
+            if (token && user) {
+                setAuthToken(token);
+                onRegister(user.name, user.role, token);
+            } else {
+                setError('Неверный ответ от сервера');
+            }
+        } catch (err: any) {
+            console.error('Registration error:', err);
+            const errorMessage = err.response?.data?.error || err.message || 'Ошибка регистрации';
+            setError(errorMessage);
+        } finally {
+            setLoading(false);
+        }
     };
 
     return (
@@ -57,7 +78,8 @@ export const Register: React.FC<RegisterProps> = ({ onRegister, onNavigateToLogi
                         type="text" 
                         value={name}
                         onChange={(e) => setName(e.target.value)}
-                        className="w-full px-4 py-2 bg-white border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
+                        disabled={loading}
+                        className="w-full px-4 py-2 bg-white border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all disabled:opacity-50"
                         placeholder="Ваше имя"
                     />
                 </div>
@@ -68,7 +90,8 @@ export const Register: React.FC<RegisterProps> = ({ onRegister, onNavigateToLogi
                         type="email" 
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
-                        className="w-full px-4 py-2 bg-white border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
+                        disabled={loading}
+                        className="w-full px-4 py-2 bg-white border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all disabled:opacity-50"
                         placeholder="name@example.com"
                     />
                 </div>
@@ -79,9 +102,11 @@ export const Register: React.FC<RegisterProps> = ({ onRegister, onNavigateToLogi
                         type="password" 
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
-                        className="w-full px-4 py-2 bg-white border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
+                        disabled={loading}
+                        className="w-full px-4 py-2 bg-white border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all disabled:opacity-50"
                         placeholder="••••••••"
                     />
+                    <p className="text-xs text-slate-400 mt-1">Минимум 6 символов</p>
                 </div>
 
                 <div>
@@ -90,16 +115,25 @@ export const Register: React.FC<RegisterProps> = ({ onRegister, onNavigateToLogi
                         type="password" 
                         value={confirmPassword}
                         onChange={(e) => setConfirmPassword(e.target.value)}
-                        className="w-full px-4 py-2 bg-white border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
+                        disabled={loading}
+                        className="w-full px-4 py-2 bg-white border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all disabled:opacity-50"
                         placeholder="••••••••"
                     />
                 </div>
 
                 <button 
                     type="submit" 
-                    className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-lg shadow-lg hover:shadow-blue-200 transition-all mt-2"
+                    disabled={loading}
+                    className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-lg shadow-lg hover:shadow-blue-200 transition-all mt-2 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
                 >
-                    Зарегистрироваться
+                    {loading ? (
+                        <>
+                            <i className="fa-solid fa-spinner fa-spin mr-2"></i>
+                            Регистрация...
+                        </>
+                    ) : (
+                        'Зарегистрироваться'
+                    )}
                 </button>
             </form>
             
