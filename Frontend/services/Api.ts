@@ -205,4 +205,10 @@ export const deleteReview = async (id: number) => {
   return res.data;
 };
 
+// Добавьте новую функцию для заказов текущего пользователя
+export const getMyOrders = async () => {
+  const res = await api.get('/orders/my');
+  return res.data;
+};
+
 export default api;

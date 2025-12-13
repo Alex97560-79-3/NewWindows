@@ -93,11 +93,11 @@ const App: React.FC = () => {
           getReviews()
         ]);
 
-        // backend возвращает { data: [...] }
-        setProducts(prodRes.data || []);
-        setUsers(userRes.data || []);
-        setOrders(orderRes.data || []);
-        setReviews(reviewRes.data || []);
+        // Todos los endpoints devuelven { data: [...] }
+        setProducts(prodRes.data || prodRes || []);
+        setUsers(userRes.data || userRes || []);
+        setOrders(orderRes.data || orderRes || []);
+        setReviews(reviewRes.data || reviewRes || []);
 
       } catch (err) {
         console.error('Load error:', err);
@@ -305,14 +305,32 @@ const App: React.FC = () => {
         <Login 
           onLogin={(name, role, token) => {
             setIsLoggedIn(true);
-            setCurrentUser({ name, role } as User);
+            setCurrentUser({ name, role, id: 0, email: '', password: '', avatar_url: '' } as User);
             localStorage.setItem('token', token);
             setAuthToken(token);
             
-            if (role === 'admin') setCurrentView('admin-products');
-            else if (role === 'manager') setCurrentView('manager-dashboard');
-            else if (role === 'assembler') setCurrentView('assembler-dashboard');
-            else setCurrentView('catalog');
+            // Recargar datos después del login
+            const fetchAdminData = async () => {
+              try {
+                const [userRes, orderRes] = await Promise.all([
+                  getUsers().catch(() => ({ data: [] })),
+                  getOrders().catch(() => ({ data: [] }))
+                ]);
+                setUsers(userRes.data || []);
+                setOrders(orderRes.data || []);
+              } catch (err) {
+                console.error('Error loading admin data:', err);
+              }
+            };
+            
+            if (role === 'admin' || role === 'manager') {
+              fetchAdminData();
+              setCurrentView(role === 'admin' ? 'admin-products' : 'manager-dashboard');
+            } else if (role === 'assembler') {
+              setCurrentView('assembler-dashboard');
+            } else {
+              setCurrentView('catalog');
+            }
           }}
           onNavigateToRegister={() => setCurrentView('register')}
         />

@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { Product, Order, Category, User, Review } from '../types';
+import { Product, Order, Category, User, Review, UserRole } from '../types';
 import { ROLE_TRANSLATIONS, STATUS_TRANSLATIONS } from '../constants';
 
 interface AdminDashboardProps {
@@ -80,7 +80,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
     // User State
     const [editingUser, setEditingUser] = useState<User | null>(null);
     const [newUser, setNewUser] = useState<Partial<User>>({
-        email: '', name: '', password: '', role: UserRole.CLIENT, avatarUrl: ''
+        email: '', name: '', password: '', role: UserRole.client, avatarUrl: ''
     });
 
     // Order Editing State
@@ -153,7 +153,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
             return item;
         }).filter(item => item.quantity > 0);
         
-        const newTotal = updatedItems.reduce((sum, item) => sum + (item.basePrice * item.quantity), 0);
+        const newTotal = updatedItems.reduce((sum, item) => sum + (item.base_price * item.quantity), 0);
         onUpdateOrder({ ...order, items: updatedItems, totalAmount: newTotal });
     };
 

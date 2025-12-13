@@ -40,7 +40,7 @@ export const AssemblerDashboard: React.FC<AssemblerDashboardProps> = ({
             return item;
         }).filter(item => item.quantity > 0);
         // Recalculate basic total
-        const newTotal = updatedItems.reduce((sum, item) => sum + (item.basePrice * item.quantity), 0);
+        const newTotal = updatedItems.reduce((sum, item) => sum + (item.base_price * item.quantity), 0);
         onUpdateOrder({ ...order, items: updatedItems, totalAmount: newTotal });
     };
 
@@ -95,7 +95,7 @@ export const AssemblerDashboard: React.FC<AssemblerDashboardProps> = ({
                         <div style="font-size: 18px; margin-top: 5px;">Заказ №${order.id}</div>
                     </div>
                     <div class="meta">
-                        <div>Дата создания: ${order.createdAt}</div>
+                        <div>Дата создания: ${order.created_at}</div>
                         <div>Статус: ${STATUS_TRANSLATIONS[order.status] || order.status}</div>
                     </div>
                 </div>
@@ -103,12 +103,11 @@ export const AssemblerDashboard: React.FC<AssemblerDashboardProps> = ({
                 <div class="info-grid">
                     <div class="info-box">
                         <h3>Информация о клиенте</h3>
-                        <div class="info-row"><span class="info-label">ФИО:</span> <span>${order.customerName}</span></div>
-                        <div class="info-row"><span class="info-label">Телефон:</span> <span>${order.customerPhone}</span></div>
+                        <div class="info-row"><span class="info-label">ФИО:</span> <span>${order.customer_name}</span></div>
+                        <div class="info-row"><span class="info-label">Телефон:</span> <span>${order.customer_phone}</span></div>
                     </div>
                     <div class="info-box">
                         <h3>Детали производства</h3>
-                        <div class="info-row"><span class="info-label">План. дата готовности:</span> <span>${order.estimatedCompletionDate || 'Не назначена'}</span></div>
                         <div class="info-row"><span class="info-label">Всего позиций:</span> <span>${order.items.reduce((acc, item) => acc + item.quantity, 0)}</span></div>
                     </div>
                 </div>
@@ -128,29 +127,6 @@ export const AssemblerDashboard: React.FC<AssemblerDashboardProps> = ({
                     <tbody>
             `);
 
-            order.items.forEach((item, index) => {
-                const specs = [];
-                if (item.frameMaterial) specs.push(`Материал: ${item.frameMaterial}`);
-                if (item.glassType && item.glassType !== 'Нет') specs.push(`Стекло: ${item.glassType}`);
-                if (item.chambersCount) specs.push(`Камер: ${item.chambersCount}`);
-                
-                printWindow.document.write(`
-                    <tr>
-                        <td>${index + 1}</td>
-                        <td>
-                            <strong>${item.name}</strong><br/>
-                            <span style="color: #666;">Арт: ${item.article || '-'}</span>
-                        </td>
-                        <td>${specs.join('<br/>') || '-'}</td>
-                        <td>
-                            ${item.width > 0 && item.height > 0 ? `${item.width} x ${item.height} мм` : 'Стандарт'}
-                        </td>
-                        <td style="text-align: center; font-size: 14px;"><strong>${item.quantity}</strong></td>
-                        <td style="border: 1px solid #000;"></td>
-                    </tr>
-                `);
-            });
-
             printWindow.document.write(`
                     </tbody>
                 </table>
@@ -162,7 +138,7 @@ export const AssemblerDashboard: React.FC<AssemblerDashboardProps> = ({
                         <h3>Комментарии и примечания</h3>
                         ${order.comments.map(c => `
                             <div class="comment-item">
-                                <strong>${c.author} (${c.createdAt}):</strong> ${c.text}
+                                <strong>${c.author} (${c.created_at}):</strong> ${c.text}
                             </div>
                         `).join('')}
                     </div>
@@ -197,6 +173,8 @@ export const AssemblerDashboard: React.FC<AssemblerDashboardProps> = ({
             printWindow.print();
         }
     };
+
+    console.log(orders);
 
     return (
         <div className="bg-white rounded-lg shadow-lg border border-slate-200 p-6">
@@ -276,7 +254,7 @@ export const AssemblerDashboard: React.FC<AssemblerDashboardProps> = ({
                                         <span className="text-slate-300 text-[10px]">(Редактирование)</span>
                                     </div>
                                     <ul className="space-y-2 max-h-40 overflow-y-auto">
-                                        {order.items.map(item => (
+                                        {orders.items.map(item => (
                                             <li key={item.id} className="flex justify-between items-center text-sm border-b border-slate-100 pb-1 last:border-0">
                                                 <span className="truncate pr-2">{item.name}</span>
                                                 <div className="flex items-center gap-1 flex-shrink-0">

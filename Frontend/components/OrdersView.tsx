@@ -59,56 +59,56 @@ export const OrdersView: React.FC<OrdersViewProps> = ({ orders, isLoading }) => 
       </h1>
 
       <div className="space-y-4">
-        {orders.map(order => (
-          <div key={order.id} className="bg-white rounded-lg border border-slate-200 p-6 hover:shadow-md transition-shadow">
+        {orders.map(orders => (
+          <div key={orders.id} className="bg-white rounded-lg border border-slate-200 p-6 hover:shadow-md transition-shadow">
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4 pb-4 border-b border-slate-200">
               <div>
                 <p className="text-xs text-slate-500 uppercase tracking-wide mb-1">Номер заказа</p>
-                <p className="font-bold text-slate-800">#{order.id}</p>
+                <p className="font-bold text-slate-800">#{orders.id}</p>
               </div>
               <div>
                 <p className="text-xs text-slate-500 uppercase tracking-wide mb-1">Дата</p>
                 <p className="font-medium text-slate-700">
-                  {new Date(order.created_at).toLocaleDateString('ru-RU')}
+                  {new Date(orders.created_at).toLocaleDateString('ru-RU')}
                 </p>
               </div>
               <div>
                 <p className="text-xs text-slate-500 uppercase tracking-wide mb-1">Статус</p>
-                <div>{getStatusBadge(order.status)}</div>
+                <div>{getStatusBadge(orders.status)}</div>
               </div>
               <div>
                 <p className="text-xs text-slate-500 uppercase tracking-wide mb-1">Сумма</p>
-                <p className="font-bold text-lg text-slate-900">{order.total_amount.toFixed(0)} ₽</p>
+                <p className="font-bold text-lg text-slate-900">{orders.total_amount} ₽</p>
               </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
                 <p className="text-xs text-slate-500 font-semibold mb-1">ЗАКАЗЧИК</p>
-                <p className="font-medium text-slate-800">{order.customer_name}</p>
-                <p className="text-sm text-slate-600">{order.customer_phone}</p>
+                <p className="font-medium text-slate-800">{orders.customer_name}</p>
+                <p className="text-sm text-slate-600">{orders.customer_phone}</p>
               </div>
 
-              {order.items && order.items.length > 0 && (
+              {orders.items && orders.items.length > 0 && (
                 <div>
-                  <p className="text-xs text-slate-500 font-semibold mb-2">ТОВАРЫ ({order.items.length})</p>
+                  <p className="text-xs text-slate-500 font-semibold mb-2">ТОВАРЫ ({orders.items.length})</p>
                   <div className="space-y-1 text-sm">
-                    {order.items.slice(0, 2).map((item: any, idx: number) => (
+                    {orders.items.slice(0, 2).map((item: any, idx: number) => (
                       <p key={idx} className="text-slate-700">
                         {item.name} x{item.quantity}
                       </p>
                     ))}
-                    {order.items.length > 2 && (
-                      <p className="text-slate-500 italic">+{order.items.length - 2} еще</p>
+                    {orders.items.length > 2 && (
+                      <p className="text-slate-500 italic">+{orders.items.length - 2} еще</p>
                     )}
                   </div>
                 </div>
               )}
 
-              {order.comments && order.comments.length > 0 && (
+              {orders.comments && orders.comments.length > 0 && (
                 <div>
                   <p className="text-xs text-slate-500 font-semibold mb-1">КОММЕНТАРИИ</p>
-                  <p className="text-sm text-slate-700 line-clamp-3">{order.comments[0]?.text}</p>
+                  <p className="text-sm text-slate-700 line-clamp-3">{orders.comments[0]?.text}</p>
                 </div>
               )}
             </div>

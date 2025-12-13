@@ -29,7 +29,11 @@ export const Login: React.FC<LoginProps> = ({ onLogin, onNavigateToRegister }) =
             
             // API ahora retorna { data: { token, user } }
             const response = await apiLogin(email, password);
-            const { token, user } = response.data;
+            console.log('Login response:', response);
+            
+            // Acceder correctamente a la estructura de respuesta
+            const loginData = response.data || response;
+            const { token, user } = loginData;
             
             if (token && user) {
                 setAuthToken(token);

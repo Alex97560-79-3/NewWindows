@@ -1,7 +1,6 @@
 
 import React, { useState } from 'react';
 import { User } from '../types';
-import { ROLE_TRANSLATIONS } from '../constants';
 
 interface UserProfileProps {
     user: User;
@@ -78,7 +77,7 @@ export const UserProfile: React.FC<UserProfileProps> = ({ user, onUpdateProfile 
                         <label className="block text-sm font-medium text-slate-500 mb-1">Роль</label>
                         <input 
                             type="text" 
-                            value={ROLE_TRANSLATIONS[user.role] || user.role}
+                            value={user.role}
                             disabled
                             className="w-full bg-slate-100 border border-slate-200 text-slate-500 rounded-lg px-4 py-2 cursor-not-allowed font-medium"
                         />

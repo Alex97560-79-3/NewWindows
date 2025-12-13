@@ -1,9 +1,16 @@
+export enum UserRole {
+	admin = "admin",
+	manager = "manager",
+	client = "client",
+  assembler = "assembler"
+}
+
 export interface User {
   id?: number;
   name: string;
   email: string;
   password_hash?: string;
-  role?: string;
+  role?: UserRole;
   avatar_url?: string;
   created_at?: string;
 }
