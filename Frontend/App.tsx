@@ -18,7 +18,8 @@ import {
   updateUser,
   deleteUser,
   deleteReview,
-  updateReview
+  updateReview,
+  updateProfile
 } from './services/Api.ts';
 
 import { Layout } from './components/Layout';
@@ -190,8 +191,13 @@ const App: React.FC = () => {
   };
 
   const handleUpdateUser = async (user: User) => {
-    const res = await updateUser(user.id!, user);
-    setUsers(prev => prev.map(u => u.id === user.id ? res.data : u));
+    
+    try {
+        const savedUser = await updateProfile(updateUser);
+        setCurrentUser(savedUser);
+    } catch (err) {
+        console.error(err);
+    }
   };
 
   const handleDeleteUser = async (id: number) => {

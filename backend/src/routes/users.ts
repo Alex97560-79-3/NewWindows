@@ -52,6 +52,42 @@ router.put('/:id', authMiddleware, requireRole(['admin','manager']), async (req:
   }
 });
 
+router.put('/profile', authMiddleware, async (req: AuthRequest, res) => {
+  try {
+    const userId = req.user?.id;
+    if (!userId) return res.status(401).json({ error: 'Unauthorized' });
+
+    const payload: Partial<User> = { ...req.body };
+
+    if (payload.avatar_url) {
+      payload.avatar_url = payload.avatar_url;
+      delete payload.avatar_url;
+    }
+
+    if (payload.password_hash) {
+      payload.password_hash = await hashPassword(payload.password_hash);
+      delete payload.password_hash;
+    }
+
+    if (Object.keys(payload).length === 0) {
+      return res.status(400).json({ error: 'No data to update' });
+    }
+
+    await db<User>('users').where({ id: userId }).update(payload);
+
+    const user = await db<User>('users')
+      .where({ id: userId })
+      .first()
+      .select('id','name','email','role','avatar_url','created_at');
+
+    res.json({ data: user });
+  } catch (err) {
+    console.error('Error updating profile:', err);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+
 // DELETE /api/users/:id
 router.delete('/:id', authMiddleware, requireRole(['admin']), async (req, res) => {
   try {

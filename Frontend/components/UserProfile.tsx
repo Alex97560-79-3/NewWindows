@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { User } from '../types';
 
@@ -10,12 +9,12 @@ interface UserProfileProps {
 export const UserProfile: React.FC<UserProfileProps> = ({ user, onUpdateProfile }) => {
     const [name, setName] = useState(user.name);
     const [email, setEmail] = useState(user.email);
-    const [avatarUrl, setAvatarUrl] = useState(user.avatarUrl || '');
+    const [avatar_url, setAvatarUrl] = useState(user.avatar_url || '');
     const [isSaved, setIsSaved] = useState(false);
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        onUpdateProfile({ ...user, name, email, avatarUrl });
+        onUpdateProfile({ ...user, name, email, avatar_url });
         setIsSaved(true);
         setTimeout(() => setIsSaved(false), 4000);
     };
@@ -31,8 +30,8 @@ export const UserProfile: React.FC<UserProfileProps> = ({ user, onUpdateProfile 
                 {/* Avatar Section */}
                 <div className="flex flex-col items-center gap-4">
                     <div className="w-32 h-32 rounded-full border-4 border-blue-50 overflow-hidden shadow-sm relative group bg-slate-100">
-                        {avatarUrl ? (
-                            <img src={avatarUrl} alt={name} className="w-full h-full object-cover" />
+                        {avatar_url ? (
+                            <img src={avatar_url} alt={name} className="w-full h-full object-cover" />
                         ) : (
                             <div className="w-full h-full flex items-center justify-center text-slate-300">
                                 <i className="fa-solid fa-user text-5xl"></i>
@@ -43,7 +42,7 @@ export const UserProfile: React.FC<UserProfileProps> = ({ user, onUpdateProfile 
                          <label className="block text-xs font-medium text-slate-700 mb-1">URL Аватарки</label>
                          <input 
                             type="text" 
-                            value={avatarUrl}
+                            value={avatar_url}
                             onChange={(e) => setAvatarUrl(e.target.value)}
                             placeholder="https://..."
                             className="w-full text-xs border border-slate-300 rounded px-2 py-1 bg-white"

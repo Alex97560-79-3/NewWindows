@@ -130,6 +130,10 @@ export const deleteUser = async (id: number) => {
   return res.data;
 };
 
+export const updateProfile = async (payload: any) => {
+  const res = await api.put('/users/profile', payload);
+}
+
 /* -------------------------
    PRODUCTS
    ------------------------- */
