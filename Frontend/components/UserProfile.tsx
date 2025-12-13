@@ -17,7 +17,7 @@ export const UserProfile: React.FC<UserProfileProps> = ({ user, onUpdateProfile 
         e.preventDefault();
         onUpdateProfile({ ...user, name, email, avatarUrl });
         setIsSaved(true);
-        setTimeout(() => setIsSaved(false), 3000);
+        setTimeout(() => setIsSaved(false), 4000);
     };
 
     return (

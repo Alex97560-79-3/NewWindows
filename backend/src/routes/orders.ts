@@ -10,19 +10,23 @@ const router = Router();
 router.get('/', authMiddleware, async (req: AuthRequest, res) => {
   try {
     const role = req.user?.role;
-    if (role === 'ADMIN' || role === 'MANAGER') {
+    if (role === 'admin' || role === 'manager' || role === 'assembler') { 
       const orders = await db<Order>('orders').select('*').orderBy('created_at', 'desc');
-      // fetch items & comments for each?
+      res.json({ data: orders });
+    } else if (role === 'client') {
+      const orders = await db<Order>('orders')
+        .where('customer_id', String(req.user.id))
+        .orderBy('created_at', 'desc');
       res.json({ data: orders });
     } else {
-      const orders = await db<Order>('orders').where('customer_id', req.user.id).orderBy('created_at', 'desc');
-      res.json({ data: orders });
+      res.status(403).json({ error: 'Access denied' });
     }
   } catch (err: any) {
     console.error(err);
     res.status(500).json({ error: 'Server error' });
   }
 });
+
 
   // GET  /:id
   router.get('/:id', authMiddleware, async (req: AuthRequest, res) => {
@@ -97,7 +101,7 @@ router.post('/', async (req, res) => {
 });
 
 // PUT /api/orders/:id (update status or other fields)
-router.put('/:id', authMiddleware, requireRole(['ADMIN','MANAGER','ASSEMBLER']), async (req, res) => {
+router.put('/:id', authMiddleware, requireRole(['admin','manager','assembler']), async (req, res) => {
   try {
     const id = Number(req.params.id);
     const payload = req.body;

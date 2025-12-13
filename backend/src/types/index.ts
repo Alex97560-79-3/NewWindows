@@ -45,8 +45,6 @@ export interface Order {
   customer_phone?: string;
   status?: string;
   total_amount?: number;
-  items?: OrderItem[];
-  comments?: any[];
   created_at?: string;
   updated_at?: string;
 }

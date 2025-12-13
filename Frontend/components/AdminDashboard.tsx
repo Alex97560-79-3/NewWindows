@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Product, Order, Category, User, Review, UserRole } from '../types';
 import { ROLE_TRANSLATIONS, STATUS_TRANSLATIONS } from '../constants';
@@ -9,7 +8,7 @@ interface AdminDashboardProps {
     users: User[];
     reviews?: Review[];
     categories?: Category[];
-    currentUser?: User | null;
+    current_user?: User | null;
     onNavigate?: (view: string) => void;
 
     onAddProduct: (product: Product) => void;
@@ -28,8 +27,8 @@ interface AdminDashboardProps {
     // Order Management
     onUpdateOrder?: (order: Order) => void;
     onDeleteOrder?: (id: number) => void;
-    onAddOrderComment?: (orderId: number, text: string, isInternal: boolean, author: string) => void;
-    onUpdateOrderStatus?: (orderId: number, status: string) => void;
+    onAddOrderComment?: (order_id: number, text: string, isInternal: boolean, author: string) => void;
+    onUpdateOrderStatus?: (order_id: number, status: string) => void;
 
     // Reviews
     onDeleteReview?: (id: number) => void;
@@ -47,7 +46,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
     users,
     reviews = [],
     categories = [],
-    currentUser,
+    current_user,
     onNavigate,
     onAddProduct, 
     onUpdateProduct,
@@ -65,9 +64,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
 }) => {
     // Product State
     const [newProduct, setNewProduct] = useState<Partial<Product>>({
-        name: '', basePrice: 0, categoryId: 1, width: 0, height: 0,
-        frameMaterial: 'ПВХ', glassType: 'Двойной пакет', chambersCount: 3,
-        description: '', imageUrl: 'https://picsum.photos/400/400'
+        name: '', base_price: 0, category_id: 1, brand: '',
+        description: '', image_url: 'https://picsum.photos/400/400'
     });
 
     // Load product to edit if passed from parent
@@ -80,7 +78,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
     // User State
     const [editingUser, setEditingUser] = useState<User | null>(null);
     const [newUser, setNewUser] = useState<Partial<User>>({
-        email: '', name: '', password: '', role: UserRole.client, avatarUrl: ''
+        email: '', name: '', password_hash: '', role: UserRole.client, avatar_url: ''
     });
 
     // Order Editing State
@@ -95,7 +93,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
             if (productToEdit && newProduct.id) {
                 // Update existing
                 onUpdateProduct(newProduct as Product);
-                onClearEdit(); // Clear parent state
+                onClearEdit?.(); // Clear parent state
             } else {
                 // Add new
                 onAddProduct({ ...newProduct as Product, id: Date.now() });
@@ -103,19 +101,17 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
             
             // Reset form
             setNewProduct({
-                name: '', basePrice: 0, categoryId: 1, width: 0, height: 0,
-                frameMaterial: 'ПВХ', glassType: 'Двойной пакет', chambersCount: 3,
-                description: '', imageUrl: 'https://picsum.photos/400/400'
+                name: '', base_price: 0, category_id: 1, brand: '',
+                description: '', image_url: 'https://picsum.photos/400/400'
             });
         }
     };
     
     const handleCancelEdit = () => {
-        onClearEdit();
+        onClearEdit?.();
         setNewProduct({
-             name: '', basePrice: 0, categoryId: 1, width: 0, height: 0,
-             frameMaterial: 'ПВХ', glassType: 'Двойной пакет', chambersCount: 3,
-             description: '', imageUrl: 'https://picsum.photos/400/400'
+            name: '', base_price: 0, category_id: 1, brand: '',
+            description: '', image_url: 'https://picsum.photos/400/400'
         });
     };
 
@@ -126,11 +122,11 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
             onUpdateUser({ ...editingUser, ...newUser as User });
             setEditingUser(null);
         } else {
-            if (newUser.email && newUser.password && newUser.name) {
+            if (newUser.email && newUser.password_hash && newUser.name) {
                 onAddUser({ ...newUser as User, id: Date.now() });
             }
         }
-        setNewUser({ email: '', name: '', password: '', role: UserRole.CLIENT, avatarUrl: '' });
+        setNewUser({ email: '', name: '', password_hash: '', role: UserRole.client, avatar_url: '' });
     };
 
     const startEditUser = (user: User) => {
@@ -141,20 +137,20 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
     // --- Order Handlers ---
     const handleAddComment = (orderId: number) => {
         if (!commentText.trim()) return;
-        onAddOrderComment(orderId, commentText, commentType === 'internal', "Администратор");
+        onAddOrderComment?.(orderId, commentText, commentType === 'internal', "Администратор");
         setCommentText('');
     };
 
     const handleUpdateOrderItemQuantity = (order: Order, itemId: number, delta: number) => {
-        const updatedItems = order.items.map(item => {
+        const updatedItems = order.items?.map(item => {
             if (item.id === itemId) {
                 return { ...item, quantity: Math.max(0, item.quantity + delta) };
             }
             return item;
-        }).filter(item => item.quantity > 0);
+        }).filter(item => item.quantity > 0) || [];
         
         const newTotal = updatedItems.reduce((sum, item) => sum + (item.base_price * item.quantity), 0);
-        onUpdateOrder({ ...order, items: updatedItems, totalAmount: newTotal });
+        onUpdateOrder?.({ ...order, items: updatedItems, total_amount: newTotal });
     };
 
     // --- Reports Handlers ---
@@ -162,11 +158,11 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
         const headers = ['ID заказа', 'Клиент', 'Телефон', 'Статус', 'Сумма', 'Дата'];
         const rows = orders.map(o => [
             o.id,
-            o.customerName,
-            o.customerPhone,
+            o.customer_name,
+            o.customer_phone,
             STATUS_TRANSLATIONS[o.status] || o.status,
-            o.totalAmount,
-            o.createdAt
+            o.total_amount,
+            o.created_at
         ]);
         
         const csvContent = "data:text/csv;charset=utf-8," 
@@ -202,7 +198,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
             printWindow.document.write('<table><thead><tr><th>ID</th><th>Клиент</th><th>Статус</th><th>Сумма</th><th>Дата</th></tr></thead><tbody>');
             
             orders.forEach(o => {
-                printWindow.document.write(`<tr><td>${o.id}</td><td>${o.customerName}</td><td>${STATUS_TRANSLATIONS[o.status] || o.status}</td><td>${o.totalAmount} ₽</td><td>${o.createdAt}</td></tr>`);
+                printWindow.document.write(`<tr><td>${o.id}</td><td>${o.customer_name}</td><td>${STATUS_TRANSLATIONS[o.status] || o.status}</td><td>${o.total_amount} ₽</td><td>${o.created_at}</td></tr>`);
             });
             
             printWindow.document.write('</tbody></table>');
@@ -219,7 +215,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
             fileReader.onload = (event) => {
                 try {
                     const jsonData = JSON.parse(event.target?.result as string);
-                    onImportData(jsonData);
+                    onImportData?.(jsonData);
                 } catch (error) {
                     alert("Ошибка при чтении файла. Убедитесь, что это корректный JSON.");
                 }
@@ -232,25 +228,25 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
     const renderTabs = () => (
         <div className="flex flex-wrap gap-1 bg-slate-200 p-1 rounded-lg mb-6 w-full md:w-fit">
             <button 
-                onClick={() => onNavigate('admin-products')}
+                onClick={() => onNavigate?.('admin-products')}
                 className={`flex-1 md:flex-none px-4 py-2 rounded-md text-sm font-medium transition-colors ${activeTab === 'products' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-600 hover:text-slate-900'}`}
             >
                 Товары
             </button>
             <button 
-                onClick={() => onNavigate('admin-orders')}
+                onClick={() => onNavigate?.('admin-orders')}
                 className={`flex-1 md:flex-none px-4 py-2 rounded-md text-sm font-medium transition-colors ${activeTab === 'orders' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-600 hover:text-slate-900'}`}
             >
                 Заказы
             </button>
             <button 
-                onClick={() => onNavigate('admin-users')}
+                onClick={() => onNavigate?.('admin-users')}
                 className={`flex-1 md:flex-none px-4 py-2 rounded-md text-sm font-medium transition-colors ${activeTab === 'users' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-600 hover:text-slate-900'}`}
             >
                 Люди
             </button>
             <button 
-                onClick={() => onNavigate('admin-reports')}
+                onClick={() => onNavigate?.('admin-reports')}
                 className={`flex-1 md:flex-none px-4 py-2 rounded-md text-sm font-medium transition-colors ${activeTab === 'reports' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-600 hover:text-slate-900'}`}
             >
                 Отчеты
@@ -274,23 +270,23 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                         </thead>
                         <tbody className="divide-y divide-slate-100">
                             {users.map(user => {
-                                const isCurrentUser = currentUser?.id === user.id;
+                                const isCurrentUser = current_user?.id === user.id;
                                 return (
                                     <tr key={user.id} className="hover:bg-slate-50">
                                         <td className="px-4 py-3 font-medium flex items-center gap-2 whitespace-nowrap">
-                                            {user.avatarUrl && <img src={user.avatarUrl} alt="" className="w-6 h-6 rounded-full object-cover" />}
+                                            {user.avatar_url && <img src={user.avatar_url} alt="" className="w-6 h-6 rounded-full object-cover" />}
                                             {user.name}
                                             {isCurrentUser && <span className="text-[10px] bg-blue-100 text-blue-700 px-1.5 rounded ml-1">Вы</span>}
                                         </td>
                                         <td className="px-4 py-3 text-slate-500">{user.email}</td>
                                         <td className="px-4 py-3 whitespace-nowrap">
                                             <span className={`px-2 py-1 rounded-full text-xs font-bold ${
-                                                user.role === UserRole.ADMIN ? 'bg-red-100 text-red-800' :
-                                                user.role === UserRole.ASSEMBLER ? 'bg-orange-100 text-orange-800' :
-                                                user.role === UserRole.MANAGER ? 'bg-purple-100 text-purple-800' :
+                                                user.role === UserRole.admin ? 'bg-red-100 text-red-800' :
+                                                user.role === UserRole.assembler ? 'bg-orange-100 text-orange-800' :
+                                                user.role === UserRole.manager ? 'bg-purple-100 text-purple-800' :
                                                 'bg-blue-100 text-blue-800'
                                             }`}>
-                                                {ROLE_TRANSLATIONS[user.role] || user.role}
+                                                {ROLE_TRANSLATIONS[user.role || UserRole.client] || user.role}
                                             </span>
                                         </td>
                                         <td className="px-4 py-3 text-right space-x-2 whitespace-nowrap">
@@ -338,8 +334,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                         <label className="block text-xs font-medium text-slate-700 mb-1">Пароль</label>
                         <input 
                             type="text" required={!editingUser}
-                            value={newUser.password}
-                            onChange={e => setNewUser({...newUser, password: e.target.value})}
+                            value={newUser.password_hash}
+                            onChange={e => setNewUser({...newUser, password_hash: e.target.value})}
                             className="w-full bg-white border-slate-300 rounded-md shadow-sm text-sm p-2 border"
                             placeholder={editingUser ? "Оставьте пустым, если не меняете" : ""}
                         />
@@ -348,8 +344,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                         <label className="block text-xs font-medium text-slate-700 mb-1">Ссылка на аватар</label>
                         <input 
                             type="text"
-                            value={newUser.avatarUrl || ''}
-                            onChange={e => setNewUser({...newUser, avatarUrl: e.target.value})}
+                            value={newUser.avatar_url || ''}
+                            onChange={e => setNewUser({...newUser, avatar_url: e.target.value})}
                             className="w-full bg-white border-slate-300 rounded-md shadow-sm text-sm p-2 border"
                             placeholder="https://..."
                         />
@@ -367,13 +363,13 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                         </select>
                     </div>
                     <div className="flex gap-2">
-                            <button type="submit" className="flex-1 bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 transition">
+                        <button type="submit" className="flex-1 bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 transition">
                             {editingUser ? 'Сохранить' : 'Создать'}
                         </button>
                         {editingUser && (
                             <button 
                                 type="button" 
-                                onClick={() => { setEditingUser(null); setNewUser({ email: '', name: '', password: '', role: UserRole.CLIENT, avatarUrl: '' }); }}
+                                onClick={() => { setEditingUser(null); setNewUser({ email: '', name: '', password_hash: '', role: UserRole.client, avatar_url: '' }); }}
                                 className="bg-slate-200 text-slate-700 px-3 rounded-md hover:bg-slate-300"
                             >
                                 Отмена
@@ -401,7 +397,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                                     <span className="font-mono text-lg font-bold text-slate-700">#{order.id}</span>
                                     <select 
                                         value={order.status}
-                                        onChange={(e) => onUpdateOrder({...order, status: e.target.value as any})}
+                                        onChange={(e) => onUpdateOrder?.({...order, status: e.target.value as any})}
                                         className="bg-white text-xs border border-slate-300 rounded px-2 py-1 font-bold"
                                     >
                                         <option value="Pending">{STATUS_TRANSLATIONS['Pending']}</option>
@@ -411,9 +407,9 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                                     </select>
                                 </div>
                                 <div className="text-sm text-slate-600 mt-1">
-                                    <span className="font-bold">{order.customerName}</span> ({order.customerPhone})
+                                    <span className="font-bold">{order.customer_name}</span> ({order.customer_phone})
                                 </div>
-                                <div className="text-xs text-slate-400">{order.createdAt}</div>
+                                <div className="text-xs text-slate-400">{order.created_at}</div>
                             </div>
                             
                             <div className="text-right">
@@ -421,14 +417,14 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                                     <span className="text-sm text-slate-500">Итого:</span>
                                     <input 
                                         type="number"
-                                        value={order.totalAmount}
-                                        onChange={(e) => onUpdateOrder({...order, totalAmount: Number(e.target.value)})}
+                                        value={order.total_amount}
+                                        onChange={(e) => onUpdateOrder?.({...order, total_amount: Number(e.target.value)})}
                                         className="w-24 bg-white border border-slate-300 rounded px-2 py-1 text-right font-bold text-lg"
                                     />
                                     <span className="font-bold text-lg">₽</span>
                                 </div>
                                 <button 
-                                    onClick={() => onDeleteOrder(order.id)}
+                                    onClick={() => order.id && onDeleteOrder?.(order.id)}
                                     className="text-red-500 text-xs hover:underline mt-2"
                                 >
                                     Удалить заказ
@@ -441,23 +437,23 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                             <div>
                                 <h4 className="font-bold text-sm text-slate-700 mb-2">Состав заказа</h4>
                                 <div className="bg-white rounded border border-slate-200 overflow-hidden">
-                                    {order.items.map(item => (
+                                    {order.items?.map(item => (
                                         <div key={item.id} className="flex justify-between items-center p-3 border-b border-slate-100 last:border-0">
                                             <div className="text-sm">
                                                 <div className="font-medium text-slate-800">{item.name}</div>
-                                                <div className="text-xs text-slate-500">{item.basePrice} ₽/шт</div>
+                                                <div className="text-xs text-slate-500">{item.base_price} ₽/шт</div>
                                             </div>
                                             <div className="flex items-center gap-2">
                                                 <button 
-                                                    onClick={() => handleUpdateOrderItemQuantity(order, item.id, -1)}
+                                                    onClick={() => item.id && handleUpdateOrderItemQuantity(order, item.id, -1)}
                                                     className="w-6 h-6 bg-slate-100 rounded flex items-center justify-center hover:bg-slate-200"
                                                 >
                                                     -
                                                 </button>
                                                 <span className="text-sm font-mono w-4 text-center">{item.quantity}</span>
                                                 <button 
-                                                        onClick={() => handleUpdateOrderItemQuantity(order, item.id, 1)}
-                                                        className="w-6 h-6 bg-slate-100 rounded flex items-center justify-center hover:bg-slate-200"
+                                                    onClick={() => item.id && handleUpdateOrderItemQuantity(order, item.id, 1)}
+                                                    className="w-6 h-6 bg-slate-100 rounded flex items-center justify-center hover:bg-slate-200"
                                                 >
                                                     +
                                                 </button>
@@ -471,17 +467,17 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                             <div className="flex flex-col h-full">
                                 <h4 className="font-bold text-sm text-slate-700 mb-2">Комментарии</h4>
                                 <div className="flex-1 bg-white border border-slate-200 rounded mb-3 p-3 max-h-40 overflow-y-auto">
-                                    {order.comments.length === 0 ? (
+                                    {!order.comments || order.comments.length === 0 ? (
                                         <p className="text-xs text-slate-400 italic">Нет комментариев</p>
                                     ) : (
                                         <div className="space-y-3">
                                             {order.comments.map(comment => (
-                                                <div key={comment.id} className={`p-2 rounded text-xs ${comment.isInternal ? 'bg-yellow-50 border border-yellow-100' : 'bg-blue-50 border border-blue-100'}`}>
+                                                <div key={comment.id} className={`p-2 rounded text-xs ${comment.is_internal ? 'bg-yellow-50 border border-yellow-100' : 'bg-blue-50 border border-blue-100'}`}>
                                                     <div className="flex justify-between mb-1">
                                                         <span className="font-bold">{comment.author}</span>
                                                         <span className="text-[10px] text-slate-400">
-                                                            {comment.isInternal && <i className="fa-solid fa-lock mr-1" title="Внутренний"></i>}
-                                                            {comment.createdAt}
+                                                            {comment.is_internal && <i className="fa-solid fa-lock mr-1" title="Внутренний"></i>}
+                                                            {comment.created_at}
                                                         </span>
                                                     </div>
                                                     <p className="text-slate-700">{comment.text}</p>
@@ -494,7 +490,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                                     <input 
                                         type="text" 
                                         value={editingOrderId === order.id ? commentText : ''}
-                                        onChange={(e) => { setEditingOrderId(order.id); setCommentText(e.target.value); }}
+                                        onChange={(e) => { setEditingOrderId(order.id || null); setCommentText(e.target.value); }}
                                         placeholder="Комментарий..."
                                         className="flex-1 bg-white border border-slate-300 rounded px-2 py-1 text-sm"
                                     />
@@ -507,7 +503,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                                         <option value="public">Публичный</option>
                                     </select>
                                     <button 
-                                        onClick={() => handleAddComment(order.id)}
+                                        onClick={() => order.id && handleAddComment(order.id)}
                                         className="bg-blue-600 text-white px-3 py-1 rounded text-sm hover:bg-blue-700"
                                     >
                                         <i className="fa-solid fa-paper-plane"></i>
@@ -530,25 +526,25 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                     {products.map(product => (
                         <div key={product.id} className="flex flex-col sm:flex-row sm:items-center justify-between p-4 bg-slate-50 rounded-lg border border-slate-100 gap-4">
                             <div className="flex items-center space-x-4">
-                                <img src={product.imageUrl} alt="" className="w-12 h-12 rounded object-cover" />
+                                <img src={product.image_url} alt="" className="w-12 h-12 rounded object-cover" />
                                 <div>
                                     <h4 className="font-semibold text-slate-800">{product.name}</h4>
                                     <div className="text-xs text-slate-500">
-                                        {product.width}x{product.height} | {product.frameMaterial}
+                                        {product.brand}
                                     </div>
                                 </div>
                             </div>
                             <div className="flex items-center space-x-4 justify-end">
-                                <span className="font-mono font-medium">{product.basePrice} ₽</span>
+                                <span className="font-mono font-medium">{product.base_price} ₽</span>
                                 <button 
-                                    onClick={() => { setNewProduct(product); onClearEdit(); }}
+                                    onClick={() => { setNewProduct(product); onClearEdit?.(); }}
                                     className="text-blue-500 hover:text-blue-700 p-2"
                                     title="Редактировать"
                                 >
                                     <i className="fa-solid fa-pen"></i>
                                 </button>
                                 <button 
-                                    onClick={() => onDeleteProduct(product.id)}
+                                    onClick={() => product.id && onDeleteProduct(product.id)}
                                     className="text-red-500 hover:text-red-700 p-2"
                                     title="Удалить"
                                 >
@@ -578,10 +574,10 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                         <div>
                             <label className="block text-xs font-medium text-slate-700 mb-1">Категория</label>
                             <select 
-                                value={newProduct.categoryId}
-                                onChange={e => setNewProduct({...newProduct, categoryId: Number(e.target.value)})}
+                                value={newProduct.category_id}
+                                onChange={e => setNewProduct({...newProduct, category_id: Number(e.target.value)})}
                                 className="w-full bg-white border-slate-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm p-2 border"
-                            >
+                            >``
                                 {categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
                             </select>
                         </div>
@@ -589,32 +585,21 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                             <label className="block text-xs font-medium text-slate-700 mb-1">Цена (₽)</label>
                             <input 
                                 type="number" required
-                                value={newProduct.basePrice}
-                                onChange={e => setNewProduct({...newProduct, basePrice: Number(e.target.value)})}
+                                value={newProduct.base_price}
+                                onChange={e => setNewProduct({...newProduct, base_price: Number(e.target.value)})}
                                 className="w-full bg-white border-slate-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm p-2 border"
                             />
                         </div>
                     </div>
 
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div>
-                            <label className="block text-xs font-medium text-slate-700 mb-1">Материал</label>
-                            <input 
-                                type="text"
-                                value={newProduct.frameMaterial}
-                                onChange={e => setNewProduct({...newProduct, frameMaterial: e.target.value})}
-                                className="w-full bg-white border-slate-300 rounded-md shadow-sm text-sm p-2 border"
-                            />
-                        </div>
-                        <div>
-                            <label className="block text-xs font-medium text-slate-700 mb-1">Тип стекла</label>
-                            <input 
-                                type="text"
-                                value={newProduct.glassType}
-                                onChange={e => setNewProduct({...newProduct, glassType: e.target.value})}
-                                className="w-full bg-white border-slate-300 rounded-md shadow-sm text-sm p-2 border"
-                            />
-                        </div>
+                    <div>
+                        <label className="block text-xs font-medium text-slate-700 mb-1">Бренд</label>
+                        <input 
+                            type="text"
+                            value={newProduct.brand}
+                            onChange={e => setNewProduct({...newProduct, brand: e.target.value})}
+                            className="w-full bg-white border-slate-300 rounded-md shadow-sm text-sm p-2 border"
+                        />
                     </div>
 
                     <div>
@@ -633,22 +618,22 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                         <label className="block text-xs font-medium text-slate-700 mb-1">Ссылка на изображение</label>
                         <input 
                             type="text"
-                            value={newProduct.imageUrl || ''}
-                            onChange={e => setNewProduct({...newProduct, imageUrl: e.target.value})}
+                            value={newProduct.image_url || ''}
+                            onChange={e => setNewProduct({...newProduct, image_url: e.target.value})}
                             className="w-full bg-white border-slate-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm p-2 border"
                             placeholder="https://..."
                         />
                     </div>
 
                     <div className="flex gap-2">
-                         <button 
+                        <button 
                             type="submit" 
                             className="flex-1 bg-blue-600 text-white font-medium py-2 rounded-md hover:bg-blue-700 transition"
                         >
                             {productToEdit || newProduct.id ? 'Сохранить изменения' : 'Создать товар'}
                         </button>
                         {(productToEdit || newProduct.id) && (
-                             <button 
+                            <button 
                                 type="button"
                                 onClick={handleCancelEdit}
                                 className="bg-slate-200 text-slate-700 px-3 rounded-md hover:bg-slate-300"
@@ -664,9 +649,9 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
 
     const renderReportsTab = () => (
         <div className="bg-white rounded-lg shadow border border-slate-200 p-6">
-             <h2 className="text-xl font-bold mb-6">Отчеты и Экспорт</h2>
-             
-             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <h2 className="text-xl font-bold mb-6">Отчеты и Экспорт</h2>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 <div className="border border-slate-200 rounded-lg p-5 hover:bg-slate-50 transition-colors">
                     <div className="text-3xl text-green-600 mb-3"><i className="fa-solid fa-file-csv"></i></div>
                     <h3 className="font-bold text-lg mb-2">Экспорт CSV</h3>
@@ -687,9 +672,9 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                     <p className="text-sm text-slate-500 mb-4">Версия для печати или сохранения в PDF.</p>
                     <button onClick={handlePrintPDF} className="bg-red-600 text-white px-4 py-2 rounded text-sm hover:bg-red-700">Печать (PDF)</button>
                 </div>
-             </div>
+            </div>
 
-             <div className="mt-8 border-t border-slate-200 pt-8">
+            <div className="mt-8 border-t border-slate-200 pt-8">
                 <h3 className="font-bold text-lg mb-4">Импорт данных</h3>
                 <div className="max-w-md">
                     <label className="block text-sm font-medium text-slate-700 mb-2">Загрузить JSON файл</label>
@@ -701,14 +686,14 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                     />
                     <p className="text-xs text-slate-400 mt-2">Внимание: Импорт объединит данные из файла с текущими данными.</p>
                 </div>
-             </div>
+            </div>
         </div>
     );
 
     return (
         <div className="max-w-6xl mx-auto">
             <div className="flex items-center gap-3 mb-6">
-                 <h1 className="text-2xl font-bold text-slate-900">Административная панель</h1>
+                <h1 className="text-2xl font-bold text-slate-900">Административная панель</h1>
             </div>
 
             {renderTabs()}

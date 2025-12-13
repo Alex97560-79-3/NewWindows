@@ -30,7 +30,7 @@ router.post('/', authMiddleware, async (req, res) => {
 });
 
 // PUT /api/reviews/:id (reply or edit) - require manager
-router.put('/:id', authMiddleware, requireRole(['ADMIN','MANAGER']), async (req, res) => {
+router.put('/:id', authMiddleware, requireRole(['admin','manager']), async (req, res) => {
   try {
     const id = Number(req.params.id);
     const payload = req.body;
@@ -44,7 +44,7 @@ router.put('/:id', authMiddleware, requireRole(['ADMIN','MANAGER']), async (req,
 });
 
 // DELETE /api/reviews/:id
-router.delete('/:id', authMiddleware, requireRole(['ADMIN','MANAGER']), async (req, res) => {
+router.delete('/:id', authMiddleware, requireRole(['admin','manager']), async (req, res) => {
   try {
     const id = Number(req.params.id);
     await db<Review>('reviews').where({ id }).del();

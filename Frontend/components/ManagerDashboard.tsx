@@ -58,7 +58,7 @@ export const ManagerDashboard: React.FC<ManagerDashboardProps> = ({
     // Review Logic
     const [replyText, setReplyText] = useState<Record<number, string>>({});
 
-    const assemblers = users.filter(u => u.role === UserRole.ASSEMBLER);
+    const assemblers = users.filter(u => u.role === UserRole.assembler);
 
     // --- Product Handlers ---
     const handleSaveProduct = (e: React.FormEvent) => {
@@ -81,7 +81,7 @@ export const ManagerDashboard: React.FC<ManagerDashboardProps> = ({
     };
 
     const handleUpdateOrderPrice = (order: Order, newTotal: number) => {
-        onUpdateOrder({ ...order, totalAmount: newTotal });
+        onUpdateOrder({ ...order, total_amount: newTotal });
     };
 
     // --- Review Handlers ---
@@ -97,11 +97,11 @@ export const ManagerDashboard: React.FC<ManagerDashboardProps> = ({
         const headers = ['ID заказа', 'Клиент', 'Телефон', 'Статус', 'Сумма', 'Дата'];
         const rows = orders.map(o => [
             o.id,
-            o.customerName,
-            o.customerPhone,
+            o.customer_name,
+            o.customer_phone,
             STATUS_TRANSLATIONS[o.status] || o.status,
-            o.totalAmount,
-            o.createdAt
+            o.total_amount,
+            o.created_at
         ]);
         
         const csvContent = "data:text/csv;charset=utf-8," 
@@ -137,7 +137,7 @@ export const ManagerDashboard: React.FC<ManagerDashboardProps> = ({
             printWindow.document.write('<table><thead><tr><th>ID</th><th>Клиент</th><th>Статус</th><th>Сумма</th><th>Дата</th></tr></thead><tbody>');
             
             orders.forEach(o => {
-                printWindow.document.write(`<tr><td>${o.id}</td><td>${o.customerName}</td><td>${STATUS_TRANSLATIONS[o.status] || o.status}</td><td>${o.totalAmount} ₽</td><td>${o.createdAt}</td></tr>`);
+                printWindow.document.write(`<tr><td>${o.id}</td><td>${o.customer_name}</td><td>${STATUS_TRANSLATIONS[o.status] || o.status}</td><td>${o.total_amount} ₽</td><td>${o.created_at}</td></tr>`);
             });
             
             printWindow.document.write('</tbody></table>');
@@ -241,7 +241,7 @@ export const ManagerDashboard: React.FC<ManagerDashboardProps> = ({
 
     const renderOrders = () => {
         const filteredOrders = orders.filter(o => 
-            o.customerName.toLowerCase().includes(orderSearch.toLowerCase()) || 
+            o.customer_name.toLowerCase().includes(orderSearch.toLowerCase()) || 
             o.id.toString().includes(orderSearch)
         );
 
@@ -262,15 +262,15 @@ export const ManagerDashboard: React.FC<ManagerDashboardProps> = ({
                             <div className="flex flex-wrap justify-between items-start gap-4 mb-4 pb-4 border-b border-slate-200">
                                 <div>
                                     <div className="font-mono text-lg font-bold text-slate-700">#{order.id}</div>
-                                    <div className="text-sm font-bold mt-1">{order.customerName}</div>
-                                    <div className="text-xs text-slate-500">{order.customerPhone}</div>
+                                    <div className="text-sm font-bold mt-1">{order.customer_name}</div>
+                                    <div className="text-xs text-slate-500">{order.customer_phone}</div>
                                 </div>
                                 <div className="text-right">
                                      <div className="flex items-center justify-end gap-2 mb-2">
                                         <span className="text-sm text-slate-500">Итого:</span>
                                         <input 
                                             type="number"
-                                            value={order.totalAmount}
+                                            value={order.total_amount}
                                             onChange={(e) => handleUpdateOrderPrice(order, Number(e.target.value))}
                                             className="w-24 bg-white border border-slate-300 rounded px-2 py-1 text-right font-bold text-lg"
                                         />
@@ -336,7 +336,7 @@ export const ManagerDashboard: React.FC<ManagerDashboardProps> = ({
                                         <i key={i} className={`fa-solid fa-star ${i < review.rating ? '' : 'text-slate-200'}`}></i>
                                     ))}
                                 </div>
-                                <span className="text-xs text-slate-400 ml-auto">{review.createdAt}</span>
+                                <span className="text-xs text-slate-400 ml-auto">{review.created_at}</span>
                             </div>
                             <p className="text-sm text-slate-700 mb-3">{review.text}</p>
                             

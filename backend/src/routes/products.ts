@@ -73,7 +73,7 @@ router.get('/:id', async (req, res) => {
 });
 
 // POST /api/products (admin)
-router.post('/', authMiddleware, requireRole(['ADMIN','MANAGER']), async (req, res) => {
+router.post('/', authMiddleware, requireRole(['admin','manager']), async (req, res) => {
   try {
     const payload = req.body;
     const [product] = await db<Product>('products').insert(payload).returning('*');
@@ -89,7 +89,7 @@ router.post('/', authMiddleware, requireRole(['ADMIN','MANAGER']), async (req, r
 });
 
 // PUT /api/products/:id
-router.put('/:id', authMiddleware, requireRole(['ADMIN','MANAGER']), async (req, res) => {
+router.put('/:id', authMiddleware, requireRole(['admin','manager']), async (req, res) => {
   try {
     const id = Number(req.params.id);
     const payload = req.body;
@@ -108,7 +108,7 @@ router.put('/:id', authMiddleware, requireRole(['ADMIN','MANAGER']), async (req,
 });
 
 // DELETE /api/products/:id
-router.delete('/:id', authMiddleware, requireRole(['ADMIN']), async (req, res) => {
+router.delete('/:id', authMiddleware, requireRole(['admin']), async (req, res) => {
   try {
     const id = Number(req.params.id);
     await db<Product>('products').where({ id }).del();

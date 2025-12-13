@@ -8,7 +8,7 @@ import { User } from '../types';
 const router = Router();
 
 // GET /api/users  (admin only)
-router.get('/', authMiddleware, requireRole(['ADMIN','MANAGER']), async (req, res) => {
+router.get('/', authMiddleware, requireRole(['admin','manager']), async (req, res) => {
   try {
     const users = await db<User>('users').select('id','name','email','role','avatar_url','created_at');
     res.json({ data: users });
@@ -19,7 +19,7 @@ router.get('/', authMiddleware, requireRole(['ADMIN','MANAGER']), async (req, re
 });
 
 // POST /api/users (create user) admin only
-router.post('/', authMiddleware, requireRole(['ADMIN','MANAGER']), async (req, res) => {
+router.post('/', authMiddleware, requireRole(['admin','manager']), async (req, res) => {
   try {
     const { name, email, password, role } = req.body;
     const exists = await db<User>('users').where({ email }).first();
@@ -35,7 +35,7 @@ router.post('/', authMiddleware, requireRole(['ADMIN','MANAGER']), async (req, r
 });
 
 // PUT /api/users/:id (update)
-router.put('/:id', authMiddleware, requireRole(['ADMIN','MANAGER']), async (req: AuthRequest, res) => {
+router.put('/:id', authMiddleware, requireRole(['admin','manager']), async (req: AuthRequest, res) => {
   try {
     const id = Number(req.params.id);
     const payload = { ...req.body };
@@ -53,7 +53,7 @@ router.put('/:id', authMiddleware, requireRole(['ADMIN','MANAGER']), async (req:
 });
 
 // DELETE /api/users/:id
-router.delete('/:id', authMiddleware, requireRole(['ADMIN']), async (req, res) => {
+router.delete('/:id', authMiddleware, requireRole(['admin']), async (req, res) => {
   try {
     const id = Number(req.params.id);
     await db<User>('users').where({ id }).del();

@@ -4,7 +4,7 @@ CREATE TABLE users (
   name VARCHAR(255) NOT NULL,
   email VARCHAR(255) UNIQUE NOT NULL,
   password_hash VARCHAR(255) NOT NULL,
-  role VARCHAR(32) NOT NULL DEFAULT 'GUEST',
+  role VARCHAR(32) NOT NULL DEFAULT 'client',
   avatar_url TEXT,
   created_at TIMESTAMP DEFAULT now()
 );

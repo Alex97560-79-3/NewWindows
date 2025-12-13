@@ -9,10 +9,10 @@ const handleLogin = async (email: string, password: string) => {
 
     // Навигация по ролям
     switch (data.user.role) {
-      case UserRole.ADMIN:
+      case UserRole.admin:
         setCurrentView('admin-products');
         break;
-      case UserRole.MANAGER:
+      case UserRole.manager:
         setCurrentView('manager-dashboard');
         break;
       case UserRole.ASSEMBLER:

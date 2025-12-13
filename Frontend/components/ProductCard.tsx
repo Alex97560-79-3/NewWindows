@@ -26,7 +26,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
     return (
         <div className="bg-white rounded-xl overflow-hidden hover:shadow-lg transition-shadow duration-200 flex flex-col h-full relative group border border-transparent hover:border-slate-200">
             {/* Top Right Action Button */}
-            {[UserRole.ADMIN, UserRole.MANAGER].includes(userRole) ? (
+            {[UserRole.admin, UserRole.manager].includes(userRole) ? (
                 <button 
                     onClick={(e) => {
                         e.stopPropagation();
@@ -37,7 +37,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
                 >
                     <i className="fa-solid fa-trash"></i>
                 </button>
-            ) : userRole === UserRole.ASSEMBLER ? (
+            ) : userRole === UserRole.assembler ? (
                 null
             ) : (
                 <button 
@@ -99,7 +99,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
                     className="text-sm text-slate-800 leading-snug line-clamp-2 mb-1 hover:text-blue-600 cursor-pointer"
                     onClick={() => onViewDetails(product)}
                 >
-                    {product.name}
+                    {product.name}admin
                 </h3>
 
                 {/* Rating */}
@@ -112,7 +112,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
                 </div>
 
                 {/* Action Button */}
-                {[UserRole.ADMIN, UserRole.MANAGER].includes(userRole) ? (
+                {[UserRole.admin, UserRole.manager].includes(userRole) ? (
                     <button 
                         onClick={(e) => {
                             e.stopPropagation();
@@ -122,7 +122,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
                     >
                         <i className="fa-solid fa-pen text-xs"></i> Редактировать
                     </button>
-                ) : userRole === UserRole.ASSEMBLER ? (
+                ) : userRole === UserRole.assembler ? (
                      <div className="mt-auto text-center text-xs text-slate-400 py-2 border-t border-slate-100">
                         Товар каталога
                     </div>

@@ -2,11 +2,10 @@
 import { Category, Product, Order, Review, UserRole, User } from './types';
 
 export const ROLE_TRANSLATIONS: Record<string, string> = {
-    [UserRole.GUEST]: 'Гость',
-    [UserRole.CLIENT]: 'Клиент',
-    [UserRole.ADMIN]: 'Администратор',
-    [UserRole.ASSEMBLER]: 'Сборщик',
-    [UserRole.MANAGER]: 'Менеджер'
+    [UserRole.client]: 'Клиент',
+    [UserRole.admin]: 'Администратор',
+    [UserRole.assembler]: 'Сборщик',
+    [UserRole.manager]: 'Менеджер'
 };
 
 export const STATUS_TRANSLATIONS: Record<string, string> = {
@@ -26,58 +25,58 @@ export const MOCK_USERS: User[] = [
     {
         id: 1,
         email: "admin@newwindows.com",
-        password: "123",
+        password_hash: "123",
         name: "Администратор",
-        role: UserRole.ADMIN,
-        avatarUrl: "https://i.pravatar.cc/150?u=admin"
+        role: UserRole.admin,
+        avatar_url: "https://i.pravatar.cc/150?u=admin"
     },
     {
         id: 2,
         email: "assembler@newwindows.com",
-        password: "123",
+        password_hash: "123",
         name: "Сборщик Алексей",
-        role: UserRole.ASSEMBLER,
-        avatarUrl: "https://i.pravatar.cc/150?u=assembler"
+        role: UserRole.assembler,
+        avatar_url: "https://i.pravatar.cc/150?u=assembler"
     },
     {
         id: 3,
         email: "client@newwindows.com",
-        password: "123",
+        password_hash: "123",
         name: "Иван Клиент",
-        role: UserRole.CLIENT,
-        avatarUrl: "https://i.pravatar.cc/150?u=client"
+        role: UserRole.client,
+        avatar_url: "https://i.pravatar.cc/150?u=client"
     },
     {
         id: 4,
         email: "manager@newwindows.com",
-        password: "123",
+        password_hash: "123",
         name: "Елена Менеджер",
-        role: UserRole.MANAGER,
-        avatarUrl: "https://i.pravatar.cc/150?u=manager"
+        role: UserRole.manager,
+        avatar_url: "https://i.pravatar.cc/150?u=manager"
     },
     {
         id: 5,
         email: "dmitry@example.com",
-        password: "123",
+        password_hash: "123",
         name: "Дмитрий С.",
-        role: UserRole.CLIENT,
-        avatarUrl: "https://i.pravatar.cc/150?u=dmitry"
+        role: UserRole.client,
+        avatar_url: "https://i.pravatar.cc/150?u=dmitry"
     },
     {
         id: 6,
         email: "olga@example.com",
-        password: "123",
+        password_hash: "123",
         name: "Ольга К.",
-        role: UserRole.CLIENT,
-        avatarUrl: "https://i.pravatar.cc/150?u=olga"
+        role: UserRole.client,
+        avatar_url: "https://i.pravatar.cc/150?u=olga"
     },
     {
         id: 7,
         email: "sergey@example.com",
-        password: "123",
+        password_hash: "123",
         name: "Сергей В.",
-        role: UserRole.CLIENT,
-        avatarUrl: "https://i.pravatar.cc/150?u=sergey"
+        role: UserRole.client,
+        avatar_url: "https://i.pravatar.cc/150?u=sergey"
     }
 ];
 
@@ -97,11 +96,10 @@ export const CATEGORIES: Category[] = [
 export const PRODUCTS: Product[] = [
     {
         id: 1,
-        categoryId: 1,
+        category_id: 1,
         name: "Окно ПВХ Rehau Blitz одностворчатое поворотное",
         description: "Энергоэффективное виниловое окно классического дизайна. Идеально подходит для традиционных домов.",
-        basePrice: 5600,
-        oldPrice: 12500,
+        base_price: 5600,
         discount: 55,
         width: 600,
         height: 900,
@@ -118,11 +116,10 @@ export const PRODUCTS: Product[] = [
     },
     {
         id: 2,
-        categoryId: 2,
+        category_id: 2,
         name: "Окно Деревянное Дуб Премиум 2-х створчатое",
         description: "Элегантное окно из деревянного профиля, обеспечивающее отличную вентиляцию и панорамный вид.",
-        basePrice: 25400,
-        oldPrice: 32000,
+        base_price: 25400,
         discount: 20,
         width: 1200,
         height: 1400,
@@ -138,10 +135,10 @@ export const PRODUCTS: Product[] = [
     },
     {
         id: 3,
-        categoryId: 3,
+        category_id: 3,
         name: "Раздвижная система Alutech C48",
         description: "Изящное раздвижное окно из алюминиевого профиля, идеально для современной архитектуры.",
-        basePrice: 18900,
+        base_price: 18900,
         width: 2000,
         height: 1500,
         frameMaterial: "Алюминий",
@@ -156,11 +153,10 @@ export const PRODUCTS: Product[] = [
     },
     {
         id: 4,
-        categoryId: 1,
+        category_id: 1,
         name: "Балконный блок Veka Softline",
         description: "Высокоэффективное ПВХ окно, разработанное для максимальной теплоизоляции.",
-        basePrice: 15600,
-        oldPrice: 28000,
+        base_price: 15600,
         discount: 44,
         width: 1500,
         height: 2100,
@@ -176,11 +172,10 @@ export const PRODUCTS: Product[] = [
     },
     {
         id: 5,
-        categoryId: 2,
+        category_id: 2,
         name: "Глухое окно KBE Engine 58мм",
         description: "Глухое окно в индустриальном стиле с декоративной раскладкой.",
-        basePrice: 3200,
-        oldPrice: 4500,
+        base_price: 3200,
         discount: 28,
         width: 500,
         height: 500,
@@ -197,11 +192,10 @@ export const PRODUCTS: Product[] = [
     },
      {
         id: 6,
-        categoryId: 5,
+        category_id: 5,
         name: "Москитная сетка рамочная (Стандарт)",
         description: "Защита от насекомых.",
-        basePrice: 850,
-        oldPrice: 1200,
+        base_price: 850,
         discount: 30,
         width: 600,
         height: 1300,
@@ -217,11 +211,10 @@ export const PRODUCTS: Product[] = [
     },
     {
         id: 7,
-        categoryId: 6,
+        category_id: 6,
         name: "Монтаж 'Под ключ'",
         description: "Полный комплекс работ по установке окна.",
-        basePrice: 3500,
-        oldPrice: 4000,
+        base_price: 3500,
         discount: 12,
         width: 0,
         height: 0,
@@ -237,11 +230,10 @@ export const PRODUCTS: Product[] = [
     },
     {
         id: 8,
-        categoryId: 7,
+        category_id: 7,
         name: "Подоконник ПВХ Белый 200мм",
         description: "Прочный пластиковый подоконник, устойчивый к царапинам.",
-        basePrice: 600,
-        oldPrice: 800,
+        base_price: 600,
         discount: 25,
         width: 200,
         height: 1500,
@@ -257,10 +249,10 @@ export const PRODUCTS: Product[] = [
     },
     {
         id: 9,
-        categoryId: 8,
+        category_id: 8,
         name: "Наличник ПВХ 80мм",
         description: "Финишная отделка оконного проема, скрывает монтажный шов.",
-        basePrice: 150,
+        base_price: 150,
         width: 80,
         height: 2200,
         frameMaterial: "ПВХ",
@@ -275,10 +267,10 @@ export const PRODUCTS: Product[] = [
     },
     {
         id: 10,
-        categoryId: 9,
+        category_id: 9,
         name: "Анкерная пластина 150мм",
         description: "Усиленная пластина для крепления оконных рам.",
-        basePrice: 25,
+        base_price: 25,
         width: 30,
         height: 150,
         frameMaterial: "Сталь",
@@ -293,11 +285,10 @@ export const PRODUCTS: Product[] = [
     },
     {
         id: 11,
-        categoryId: 10,
+        category_id: 10,
         name: "Монтажная пена Profi 65L",
         description: "Профессиональная зимняя монтажная пена с низким расширением.",
-        basePrice: 650,
-        oldPrice: 800,
+        base_price: 650,
         discount: 18,
         width: 0,
         height: 0,
