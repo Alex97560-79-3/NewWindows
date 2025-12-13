@@ -1,18 +1,7 @@
 
 import { Category, Product, Order, Review, UserRole, User } from './types';
-import product1 from './img/product/product1.png';
-import product2 from './img/product/product2.webp';
-import product3 from './img/product/product3.jpg';
-import product4 from './img/product/product4.jpg';
-import product5 from './img/product/product5.jpg';
-import product6 from './img/product/product6.jpg';
-import product7 from './img/product/product7.jpg';
-import product8 from './img/product/product8.jpg';
-import product9 from './img/product/product9.jpg';
-import product10 from './img/product/product10.jpg';
-import product11 from './img/product/product11.jpg';
 
-export const ROLE_TRANSLATIONS: Record<UserRole, string> = {
+export const ROLE_TRANSLATIONS: Record<string, string> = {
     [UserRole.GUEST]: 'Гость',
     [UserRole.CLIENT]: 'Клиент',
     [UserRole.ADMIN]: 'Администратор',
@@ -119,7 +108,7 @@ export const PRODUCTS: Product[] = [
         frameMaterial: "ПВХ",
         glassType: "Двойной стеклопакет",
         chambersCount: 3,
-        imageUrl: product1,
+        imageUrl: 'https://picsum.photos/400/400?random=1',
         rating: 4.8,
         reviewCount: 0,
         isOriginal: true,
@@ -140,7 +129,7 @@ export const PRODUCTS: Product[] = [
         frameMaterial: "Дерево (Дуб)",
         glassType: "Тройной стеклопакет",
         chambersCount: 5,
-        imageUrl: product2,
+        imageUrl: 'https://picsum.photos/400/400?random=2',
         rating: 4.9,
         reviewCount: 0,
         isOriginal: true,
@@ -158,7 +147,7 @@ export const PRODUCTS: Product[] = [
         frameMaterial: "Алюминий",
         glassType: "Закаленный двойной пакет",
         chambersCount: 4,
-        imageUrl: product3,
+        imageUrl: 'https://picsum.photos/400/400?random=3',
         rating: 4.5,
         reviewCount: 0,
         isOriginal: true,
@@ -178,7 +167,7 @@ export const PRODUCTS: Product[] = [
         frameMaterial: "Усиленный ПВХ",
         glassType: "Тройной пакет",
         chambersCount: 6,
-        imageUrl: product4,
+        imageUrl: 'https://picsum.photos/400/400?random=4',
         rating: 4.7,
         reviewCount: 0,
         isSale: true,
@@ -198,7 +187,7 @@ export const PRODUCTS: Product[] = [
         frameMaterial: "ПВХ",
         glassType: "Прозрачный двойной пакет",
         chambersCount: 3,
-        imageUrl: product5,
+        imageUrl: 'https://picsum.photos/400/400?random=5',
         rating: 4.6,
         reviewCount: 0,
         isOriginal: true,
@@ -219,7 +208,7 @@ export const PRODUCTS: Product[] = [
         frameMaterial: "Алюминий",
         glassType: "Сетка",
         chambersCount: 0,
-        imageUrl: product6,
+        imageUrl: 'https://picsum.photos/400/400?random=6',
         rating: 4.9,
         reviewCount: 0,
         isSale: true,
@@ -239,7 +228,7 @@ export const PRODUCTS: Product[] = [
         frameMaterial: "Сервис",
         glassType: "Нет",
         chambersCount: 0,
-        imageUrl: product7,
+        imageUrl: 'https://picsum.photos/400/400?random=7',
         rating: 4.8,
         reviewCount: 0,
         isSale: false,
@@ -259,7 +248,7 @@ export const PRODUCTS: Product[] = [
         frameMaterial: "ПВХ",
         glassType: "Нет",
         chambersCount: 0,
-        imageUrl: product8,
+        imageUrl: 'https://picsum.photos/400/400?random=8',
         rating: 4.7,
         reviewCount: 0,
         isSale: true,
@@ -277,7 +266,7 @@ export const PRODUCTS: Product[] = [
         frameMaterial: "ПВХ",
         glassType: "Нет",
         chambersCount: 0,
-        imageUrl: product9,
+        imageUrl: 'https://picsum.photos/400/400?random=9',
         rating: 4.5,
         reviewCount: 0,
         isSale: false,
@@ -295,7 +284,7 @@ export const PRODUCTS: Product[] = [
         frameMaterial: "Сталь",
         glassType: "Нет",
         chambersCount: 0,
-        imageUrl: product10,
+        imageUrl: 'https://picsum.photos/400/400?random=10',
         rating: 5.0,
         reviewCount: 0,
         isSale: false,
@@ -315,7 +304,7 @@ export const PRODUCTS: Product[] = [
         frameMaterial: "Химия",
         glassType: "Нет",
         chambersCount: 0,
-        imageUrl: product11,
+        imageUrl: 'https://picsum.photos/400/400?random=11',
         rating: 4.9,
         reviewCount: 0,
         isSale: true,

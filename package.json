@@ -1,4 +1,19 @@
 {
+  "name": "new-windows-fullstack",
+  "version": "1.0.0",
+  "description": "Full-stack e-commerce application",
+  "scripts": {
+    "dev": "npm run dev --workspace=backend & npm run dev --workspace=Frontend",
+    "dev:backend": "npm run dev --workspace=backend",
+    "dev:frontend": "npm run dev --workspace=Frontend",
+    "build": "npm run build --workspace=backend && npm run build --workspace=Frontend",
+    "start": "npm run start --workspace=backend",
+    "migrate": "npm run migrate --workspace=backend"
+  },
+  "workspaces": [
+    "backend",
+    "Frontend"
+  ],
   "devDependencies": {
     "@types/jsonwebtoken": "^9.0.10"
   }

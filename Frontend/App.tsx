@@ -22,7 +22,6 @@ import {
 } from './services/Api.ts';
 
 import { Layout } from './components/Layout';
-import { ProductCard } from './components/ProductCard';
 import { UserProfile } from './components/UserProfile';
 import { Login } from './components/Login';
 import { Register } from './components/Register';
@@ -30,8 +29,12 @@ import { AdminDashboard } from './components/AdminDashboard';
 import { ManagerDashboard } from './components/ManagerDashboard';
 import { AssemblerDashboard } from './components/AssemblerDashboard';
 import { ProductDetails } from './components/ProductDetails';
+import { CatalogView } from './components/CatalogView';
+import { CartView } from './components/CartView';
+import { FavoritesView } from './components/FavoritesView';
+import { OrdersView } from './components/OrdersView';
 
-import { User, Product, Order, Review } from './types';
+import { User, Product, Order, Review, CartItem } from './types';
 import { CATEGORIES } from './constants';
 
 const App: React.FC = () => {
@@ -49,7 +52,7 @@ const App: React.FC = () => {
   const [orders, setOrders] = useState<Order[]>([]);
   const [reviews, setReviews] = useState<Review[]>([]);
 
-  const [cart, setCart] = useState<Product[]>([]);
+  const [cart, setCart] = useState<CartItem[]>([]);
   const [favorites, setFavorites] = useState<number[]>([]);
   const [cartComment, setCartComment] = useState('');
 
@@ -256,15 +259,23 @@ const App: React.FC = () => {
       const exist = prev.find(p => p.id === product.id);
       if (exist) {
         return prev.map(p =>
-          p.id === product.id ? { ...p, quantity: (p as any).quantity + 1 } : p
+          p.id === product.id ? { ...p, quantity: (p.quantity || 1) + 1 } : p
         );
       }
-      return [...prev, { ...product, quantity: 1 } as any];
+      return [...prev, { ...product, quantity: 1 }];
     });
   };
 
   const handleRemoveFromCart = (id: number) => {
     setCart(prev => prev.filter(p => p.id !== id));
+  };
+
+  const handleUpdateCartQuantity = (id: number, quantity: number) => {
+    setCart(prev =>
+      prev.map(p =>
+        p.id === id ? { ...p, quantity } : p
+      )
+    );
   };
 
   const handleToggleFavorite = (id: number) => {
@@ -279,7 +290,7 @@ const App: React.FC = () => {
   return (
     <Layout
       currentRole={currentUser?.role || 'guest'}
-      cartCount={cart.reduce((acc, item) => acc + ((item as any).quantity || 0), 0)}
+      cartCount={cart.reduce((acc, item) => acc + (item.quantity || 0), 0)}
       favoritesCount={favorites.length}
       onNavigate={setCurrentView}
       currentView={currentView}
@@ -321,21 +332,147 @@ const App: React.FC = () => {
       )}
 
       {currentView === 'catalog' && (
-        <div className="text-center py-20">
-          <h1 className="text-4xl font-bold text-slate-800 mb-4">
-            Добро пожаловать в НовыеОкна
-          </h1>
-          <p className="text-slate-600">
-            {isLoggedIn ? `Привет, ${currentUser?.name}!` : 'Войдите чтобы начать покупки'}
-          </p>
-        </div>
+        <CatalogView
+          products={products}
+          selectedCategoryId={selectedCategoryId}
+          isSaleOnly={isSaleOnly}
+          onSelectProduct={(product) => {
+            setSelectedProduct(product);
+            setCurrentView('product-details');
+          }}
+          onAddToCart={handleAddToCart}
+          onToggleFavorite={handleToggleFavorite}
+          favoriteIds={favorites}
+        />
       )}
 
-      {/* 
-        TODO: Вставьте сюда остальные view
-        renderCart(), renderFavorites(), renderOrders(), renderProfile(), 
-        renderAdminPanel(), renderManagerDashboard(), renderAssemblerDashboard() и т.д.
-      */}
+      {currentView === 'product-details' && selectedProduct && (
+        <ProductDetails
+          product={selectedProduct}
+          reviews={reviews}
+          onAddToCart={handleAddToCart}
+          onBack={() => {
+            setSelectedProduct(null);
+            setCurrentView('catalog');
+          }}
+          cartItems={cart as any}
+          userRole={currentUser?.role || 'guest'}
+        />
+      )}
+
+      {currentView === 'cart' && (
+        <CartView
+          cartItems={cart}
+          onRemoveFromCart={handleRemoveFromCart}
+          onUpdateQuantity={handleUpdateCartQuantity}
+          onCreateOrder={handleCreateOrder}
+          onCommentChange={setCartComment}
+          cartComment={cartComment}
+        />
+      )}
+
+      {currentView === 'favorites' && (
+        <FavoritesView
+          favoriteIds={favorites}
+          products={products}
+          onRemoveFromFavorites={(id) => handleToggleFavorite(id)}
+          onAddToCart={handleAddToCart}
+          onViewDetails={(product) => {
+            setSelectedProduct(product);
+            setCurrentView('product-details');
+          }}
+        />
+      )}
+
+      {currentView === 'orders' && (
+        <OrdersView
+          orders={isLoggedIn ? orders : []}
+        />
+      )}
+
+      {currentView === 'profile' && isLoggedIn && currentUser && (
+        <UserProfile
+          user={currentUser}
+          onUpdateProfile={(updatedUser) => {
+            setCurrentUser(updatedUser);
+            handleUpdateUser(updatedUser);
+          }}
+        />
+      )}
+
+      {currentView === 'admin-products' && currentUser?.role === 'admin' && (
+        <AdminDashboard
+          products={products}
+          users={users}
+          orders={orders}
+          reviews={reviews}
+          categories={CATEGORIES}
+          currentUser={currentUser}
+          onNavigate={setCurrentView}
+          onAddProduct={handleAddProduct}
+          onUpdateProduct={handleUpdateProduct}
+          onDeleteProduct={handleDeleteProduct}
+          onAddUser={handleAddUser}
+          onUpdateUser={handleUpdateUser}
+          onDeleteUser={handleDeleteUser}
+          onUpdateOrder={(order) => {
+            setOrders(prev => prev.map(o => (o.id === order.id ? order : o)));
+          }}
+          onUpdateOrderStatus={handleUpdateOrderStatus}
+          onDeleteReview={handleDeleteReview}
+          onReplyReview={handleReplyReview}
+          onAddOrderComment={(orderId, text, isInternal, author) => {
+            setOrders(prev => prev.map(o => {
+              if (o.id === orderId) {
+                return {
+                  ...o,
+                  comments: [...(o.comments || []), { text, isInternal, author, createdAt: new Date().toISOString() }]
+                };
+              }
+              return o;
+            }));
+          }}
+          productToEdit={productToEdit}
+          onClearEdit={() => setProductToEdit(null)}
+        />
+      )}
+
+      {currentView === 'manager-dashboard' && currentUser?.role === 'manager' && (
+        <ManagerDashboard
+          products={products}
+          orders={orders}
+          reviews={reviews}
+          categories={CATEGORIES}
+          users={users}
+          onUpdateProduct={handleUpdateProduct}
+          onUpdateOrder={(order) => {
+            setOrders(prev => prev.map(o => (o.id === order.id ? order : o)));
+          }}
+          onUpdateOrderStatus={handleUpdateOrderStatus}
+          onDeleteReview={handleDeleteReview}
+          onReplyReview={handleReplyReview}
+          onAddOrderComment={(orderId, text, isInternal, author) => {
+            setOrders(prev => prev.map(o => {
+              if (o.id === orderId) {
+                return {
+                  ...o,
+                  comments: [...(o.comments || []), { text, isInternal, author, createdAt: new Date().toISOString() }]
+                };
+              }
+              return o;
+            }));
+          }}
+          productToEdit={productToEdit}
+          onClearEdit={() => setProductToEdit(null)}
+        />
+      )}
+
+      {currentView === 'assembler-dashboard' && currentUser?.role === 'assembler' && (
+        <AssemblerDashboard
+          orders={orders}
+          onUpdateOrderStatus={handleUpdateOrderStatus}
+        />
+      )}
     </Layout>
   );
 };

@@ -6,9 +6,10 @@ import { STATUS_TRANSLATIONS, ACCEPTANCE_TRANSLATIONS } from '../constants';
 interface AssemblerDashboardProps {
     orders: Order[];
     currentUserId?: number;
-    onUpdateStatus: (orderId: number, status: 'Completed' | 'Processing') => void;
-    onUpdateOrder: (order: Order) => void;
-    onAddOrderComment: (orderId: number, text: string, isInternal: boolean, author: string) => void;
+    onUpdateStatus?: (orderId: number, status: 'Completed' | 'Processing') => void;
+    onUpdateOrder?: (order: Order) => void;
+    onAddOrderComment?: (orderId: number, text: string, isInternal: boolean, author: string) => void;
+    onUpdateOrderStatus?: (orderId: number, status: string) => void;
 }
 
 export const AssemblerDashboard: React.FC<AssemblerDashboardProps> = ({ 
@@ -16,17 +17,18 @@ export const AssemblerDashboard: React.FC<AssemblerDashboardProps> = ({
     currentUserId,
     onUpdateStatus,
     onUpdateOrder,
-    onAddOrderComment
+    onAddOrderComment,
+    onUpdateOrderStatus
 }) => {
     const [editingOrderId, setEditingOrderId] = useState<number | null>(null);
     const [commentText, setCommentText] = useState('');
     const [commentType, setCommentType] = useState<'internal' | 'public'>('internal');
 
-    const myOrders = orders.filter(o => o.assemblerId === currentUserId && o.status !== 'Cancelled');
+    const myOrders = orders.filter(o => (o as any).assemblerId === currentUserId && o.status !== 'Cancelled');
 
     const handleAddComment = (orderId: number) => {
         if (!commentText.trim()) return;
-        onAddOrderComment(orderId, commentText, commentType === 'internal', "Сборщик");
+        onAddOrderComment?.(orderId, commentText, commentType === 'internal', "Сборщик");
         setCommentText('');
     };
 

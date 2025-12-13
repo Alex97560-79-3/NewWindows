@@ -24,8 +24,12 @@ export const Login: React.FC<LoginProps> = ({ onLogin, onNavigateToRegister }) =
         setLoading(true);
 
         try {
-            // API теперь возвращает { token, user } напрямую из res.data.data
-            const { token, user } = await apiLogin(email, password);
+            // Limpiar cualquier token antiguo antes de intentar login
+            localStorage.removeItem('token');
+            
+            // API ahora retorna { data: { token, user } }
+            const response = await apiLogin(email, password);
+            const { token, user } = response.data;
             
             if (token && user) {
                 setAuthToken(token);
@@ -62,6 +66,13 @@ export const Login: React.FC<LoginProps> = ({ onLogin, onNavigateToRegister }) =
                         </div>
                     )}
 
+                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 text-xs text-blue-800">
+                        <p className="font-semibold mb-2">Учетные данные для входа:</p>
+                        <p>Все пользователи: пароль <strong>123456</strong></p>
+                        <p>admin@example.com, manager@example.com,</p>
+                        <p>assembler@example.com, client@example.com</p>
+                    </div>
+
                     <div>
                         <label className="block text-sm font-medium text-slate-700 mb-1">Email</label>
                         <input 
@@ -70,7 +81,7 @@ export const Login: React.FC<LoginProps> = ({ onLogin, onNavigateToRegister }) =
                             onChange={(e) => setEmail(e.target.value)}
                             disabled={loading}
                             className="w-full px-4 py-2 bg-white border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all disabled:opacity-50"
-                            placeholder="name@example.com"
+                            placeholder="admin@example.com"
                         />
                     </div>
 

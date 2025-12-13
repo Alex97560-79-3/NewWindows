@@ -4,16 +4,26 @@ dotenv.config();
 
 const config: { [key: string]: Knex.Config } = {
   development: {
-    client: 'pg',
-    connection: process.env.DATABASE_URL,
+    client: 'mysql2',
+    connection: {
+      host: 'localhost',
+      user: 'root',
+      password: 'root',
+      database: 'newwindows'
+    },
     migrations: {
       tableName: 'knex_migrations',
       directory: './migrations'
     }
   },
   production: {
-    client: 'pg',
-    connection: process.env.DATABASE_URL,
+    client: 'mysql2',
+    connection: {
+      host: 'localhost',
+      user: 'root',
+      password: 'root',
+      database: 'newwindows'
+    },
     migrations: {
       tableName: 'knex_migrations',
       directory: './migrations'

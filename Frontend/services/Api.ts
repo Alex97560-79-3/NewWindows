@@ -1,7 +1,7 @@
 // frontend/services/Api.ts
 import axios, { AxiosInstance, AxiosError } from 'axios';
 
-const API_BASE = process.env.VITE_API_URL || 'http://localhost:4000/api';
+const API_BASE = 'http://localhost:3000/api';
 
 const api: AxiosInstance = axios.create({
   baseURL: API_BASE,
@@ -69,15 +69,37 @@ export const setAuthToken = (token: string | null) => {
    AUTH
    ------------------------- */
 export const login = async (email: string, password: string) => {
-  const res = await api.post('/auth/login', { email, password });
-  // Бэкенд возвращает { data: { token, user } }
-  return res.data.data;
+  const response = await fetch(`${API_BASE}/auth/login`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ email, password }),
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.error || 'Login failed');
+  }
+
+  return await response.json();
 };
 
 export const register = async (name: string, email: string, password: string) => {
-  const res = await api.post('/auth/register', { name, email, password });
-  // Бэкенд возвращает { data: { token, user } }
-  return res.data.data;
+  const response = await fetch(`${API_BASE}/auth/register`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ name, email, password }),
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.error || 'Registration failed');
+  }
+
+  return await response.json();
 };
 
 export const getMe = async () => {

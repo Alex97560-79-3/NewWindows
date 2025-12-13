@@ -12,11 +12,29 @@ router.get('/', async (req, res) => {
     // Можно расширить фильтры: ?search=&category=&minPrice=&maxPrice=&brand=&saleOnly=
     const q = db<Product>('products').select('*');
     if (req.query.search) q.whereILike('name', `%${String(req.query.search)}%`);
-    if (req.query.category) q.where('category', req.query.category as string);
+    if (req.query.category) q.where('category_id', req.query.category as string);
     if (req.query.brand) q.where('brand', req.query.brand as string);
     if (req.query.saleOnly === 'true') q.where('is_sale', true);
     const products = await q.orderBy('created_at', 'desc');
-    res.json({ data: products });
+    
+    // Генерируем недостающие поля и обрабатываем image_url
+    const productsWithData = products.map((p: any) => {
+      let imageUrl = p.image_url;
+      // Если это просто имя файла (img1.png, img2.png и т.д.) - добавляем префикс
+      if (imageUrl && !imageUrl.includes('http') && !imageUrl.startsWith('/')) {
+        imageUrl = `/uploads/${imageUrl}`;
+      }
+      return {
+        ...p,
+        image_url: imageUrl,
+        discount: p.discount || (p.is_sale ? 15 : 0),
+        is_original: p.is_original !== undefined ? p.is_original : true,
+        rating: p.rating || 4.5,
+        review_count: p.review_count || 0
+      };
+    });
+    
+    res.json({ data: productsWithData });
   } catch (err: any) {
     console.error(err);
     res.status(500).json({ error: 'Server error' });
@@ -30,7 +48,24 @@ router.get('/:id', async (req, res) => {
     const product = await db<Product>('products').where({ id }).first();
     if (!product) return res.status(404).json({ error: 'Not found' });
     const tags = await db('product_tags').where({ product_id: id }).pluck('tag');
-    res.json({ data: { ...product, tags } });
+    
+    // Обрабатываем image_url
+    let imageUrl = product.image_url;
+    if (imageUrl && !imageUrl.includes('http') && !imageUrl.startsWith('/')) {
+      imageUrl = `/uploads/${imageUrl}`;
+    }
+    
+    const productWithData = {
+      ...product,
+      image_url: imageUrl,
+      discount: product.discount || (product.is_sale ? 15 : 0),
+      is_original: product.is_original !== undefined ? product.is_original : true,
+      rating: product.rating || 4.5,
+      review_count: product.review_count || 0,
+      tags
+    };
+    
+    res.json({ data: productWithData });
   } catch (err: any) {
     console.error(err);
     res.status(500).json({ error: 'Server error' });

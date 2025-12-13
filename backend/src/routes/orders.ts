@@ -34,6 +34,7 @@ router.get('/', authMiddleware, async (req: AuthRequest, res) => {
       const comments = await db<OrderComment>('order_comments')
         .where({ order_id: id })
         .orderBy('created_at', 'asc');
+      
       res.json({ data: { ...order, items, comments } });
     } catch (err: any) {
       console.error(err);

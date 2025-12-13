@@ -2,6 +2,7 @@ import express from 'express';
 import bodyParser from 'body-parser';
 import cors from 'cors';
 import morgan from 'morgan';
+import path from 'path';
 import authRoutes from './routes/auth';
 import userRoutes from './routes/users';
 import productRoutes from './routes/products';
@@ -12,6 +13,9 @@ const app = express();
 app.use(cors());
 app.use(bodyParser.json());
 app.use(morgan('dev'));
+
+// Статические файлы
+app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);

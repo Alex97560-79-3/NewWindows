@@ -1,23 +1,24 @@
 
 import React, { useState, useEffect } from 'react';
-import { Product, Order, Category, User} from '../types';
+import { Product, Order, Category, User, Review } from '../types';
 import { ROLE_TRANSLATIONS, STATUS_TRANSLATIONS } from '../constants';
 
 interface AdminDashboardProps {
     products: Product[];
     orders: Order[];
     users: User[];
-    categories: Category[];
-    currentUser: User | null;
-    onNavigate: (view: string) => void;
+    reviews?: Review[];
+    categories?: Category[];
+    currentUser?: User | null;
+    onNavigate?: (view: string) => void;
 
     onAddProduct: (product: Product) => void;
     onUpdateProduct: (product: Product) => void;
     onDeleteProduct: (id: number) => void;
     
     // Edit Product State from Parent
-    productToEdit: Product | null;
-    onClearEdit: () => void;
+    productToEdit?: Product | null;
+    onClearEdit?: () => void;
 
     // User Management
     onAddUser: (user: User) => void;
@@ -25,21 +26,27 @@ interface AdminDashboardProps {
     onDeleteUser: (id: number) => void;
 
     // Order Management
-    onUpdateOrder: (order: Order) => void;
-    onDeleteOrder: (id: number) => void;
-    onAddOrderComment: (orderId: number, text: string, isInternal: boolean, author: string) => void;
+    onUpdateOrder?: (order: Order) => void;
+    onDeleteOrder?: (id: number) => void;
+    onAddOrderComment?: (orderId: number, text: string, isInternal: boolean, author: string) => void;
+    onUpdateOrderStatus?: (orderId: number, status: string) => void;
+
+    // Reviews
+    onDeleteReview?: (id: number) => void;
+    onReplyReview?: (id: number, text: string) => void;
 
     // Data Import
-    onImportData: (data: { products?: Product[], orders?: Order[], users?: User[] }) => void;
+    onImportData?: (data: { products?: Product[], orders?: Order[], users?: User[] }) => void;
 
-    activeTab: 'products' | 'orders' | 'users' | 'reports';
+    activeTab?: 'products' | 'orders' | 'users' | 'reports';
 }
 
 export const AdminDashboard: React.FC<AdminDashboardProps> = ({ 
     products, 
     orders, 
     users,
-    categories,
+    reviews = [],
+    categories = [],
     currentUser,
     onNavigate,
     onAddProduct, 

@@ -14,9 +14,14 @@ export interface Product {
   description?: string;
   base_price: number;
   image_url?: string;
+  category_id?: number;
   category?: string;
   brand?: string;
   is_sale?: boolean;
+  discount?: number;
+  is_original?: boolean;
+  rating?: number;
+  review_count?: number;
   delivery_time?: string;
   quantity?: number;
   created_at?: string;

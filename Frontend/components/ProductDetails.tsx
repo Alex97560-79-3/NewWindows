@@ -8,7 +8,7 @@ interface ProductDetailsProps {
     onAddToCart: (product: Product) => void;
     onBack: () => void;
     cartItems: CartItem[];
-    userRole: UserRole;
+    userRole: string | UserRole;
     onEdit?: (product: Product) => void;
     onDelete?: (id: number) => void;
 }
@@ -52,7 +52,18 @@ export const ProductDetails: React.FC<ProductDetailsProps> = ({
                 <div className="lg:col-span-5 flex flex-col md:flex-row gap-4">
                     {/* Main Image */}
                     <div className="flex-1 bg-white rounded-2xl border border-slate-100 p-2 relative group">
-                        <img src={activeImage} alt={product.name} className="w-full h-auto rounded-xl object-contain aspect-square" />
+                        <img 
+                            src={activeImage} 
+                            alt={product.name} 
+                            className="w-full h-auto rounded-xl object-contain aspect-square"
+                            onError={(e) => {
+                              (e.target as HTMLImageElement).style.display = 'none';
+                              const parent = (e.target as HTMLImageElement).parentElement;
+                              if (parent) {
+                                parent.innerHTML = '<div class="w-full h-full flex items-center justify-center bg-slate-200 rounded-xl"><i class="fa-solid fa-image text-slate-400 text-6xl"></i></div>';
+                              }
+                            }}
+                        />
                         {product.isSale && (
                             <span className="absolute top-4 left-4 bg-pink-600 text-white text-xs font-bold px-2 py-1 rounded">
                                 -{product.discount}%

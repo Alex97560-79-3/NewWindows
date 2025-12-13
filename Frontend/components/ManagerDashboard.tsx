@@ -6,28 +6,31 @@ import { STATUS_TRANSLATIONS, ACCEPTANCE_TRANSLATIONS } from '../constants';
 interface ManagerDashboardProps {
     products: Product[];
     orders: Order[];
-    reviews: Review[];
-    categories: Category[];
-    users: User[];
+    reviews?: Review[];
+    categories?: Category[];
+    users?: User[];
     
     // Actions
+    onAddProduct?: (product: Product) => void;
     onUpdateProduct: (product: Product) => void;
-    onUpdateOrder: (order: Order) => void;
-    onDeleteReview: (id: number) => void;
-    onReplyReview: (id: number, text: string) => void;
-    onAddOrderComment: (orderId: number, text: string, isInternal: boolean, author: string) => void;
+    onDeleteProduct?: (id: number) => void;
+    onUpdateOrder?: (order: Order) => void;
+    onUpdateOrderStatus?: (orderId: number, status: string) => void;
+    onDeleteReview?: (id: number) => void;
+    onReplyReview?: (id: number, text: string) => void;
+    onAddOrderComment?: (orderId: number, text: string, isInternal: boolean, author: string) => void;
 
     // Edit state from parent
-    productToEdit: Product | null;
-    onClearEdit: () => void;
+    productToEdit?: Product | null;
+    onClearEdit?: () => void;
 }
 
 export const ManagerDashboard: React.FC<ManagerDashboardProps> = ({
     products,
     orders,
-    reviews,
-    categories,
-    users,
+    reviews = [],
+    categories = [],
+    users = [],
     onUpdateProduct,
     onUpdateOrder,
     onDeleteReview,
