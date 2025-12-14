@@ -74,39 +74,34 @@ const App: React.FC = () => {
   /* ----------------------------------------
      LOAD INITIAL DATA
   ---------------------------------------- */
-  useEffect(() => {
+useEffect(() => {
+  const initApp = async () => {
     const token = localStorage.getItem('token');
-
     if (token) {
       setAuthToken(token);
       setIsLoggedIn(true);
-      // Опционально: backend можно расширить endpoint /auth/me
-      // чтобы автоматически получать текущего пользователя
     }
 
-    // Загружаем данные после старта
-    const fetchData = async () => {
-      try {
-        const [prodRes, userRes, orderRes, reviewRes] = await Promise.all([
-          getProducts(),
-          getUsers().catch(() => ({ data: [] })), // у обычных юзеров может быть 403
-          getOrders().catch(() => ({ data: [] })), // то же самое
-          getReviews()
-        ]);
+    try {
+      const [prodRes, userRes, orderRes, reviewRes] = await Promise.all([
+        getProducts().catch(() => ({ data: [] })),
+        getUsers().catch(() => ({ data: [] })),
+        getOrders().catch(() => ({ data: [] })),
+        getReviews().catch(() => ({ data: [] }))
+      ]);
 
-        // Todos los endpoints devuelven { data: [...] }
-        setProducts(prodRes.data || prodRes || []);
-        setUsers(userRes.data || userRes || []);
-        setOrders(orderRes.data || orderRes || []);
-        setReviews(reviewRes.data || reviewRes || []);
+      setProducts(prodRes?.data || []);
+      setUsers(userRes?.data || []);
+      setOrders(orderRes?.data || []);
+      setReviews(reviewRes?.data || []);
+    } catch (err) {
+      console.error('Load error:', err);
+    }
+  };
 
-      } catch (err) {
-        console.error('Load error:', err);
-      }
-    };
+  initApp();
+}, []);
 
-    fetchData();
-  }, []);
 
   /* ----------------------------------------
      AUTH
@@ -190,15 +185,20 @@ const App: React.FC = () => {
     setUsers(prev => [...prev, res.data]);
   };
 
-  const handleUpdateUser = async (user: User) => {
-    
-    try {
-        const savedUser = await updateProfile(updateUser);
-        setCurrentUser(savedUser);
-    } catch (err) {
-        console.error(err);
-    }
-  };
+const handleUpdateUser = async (user: User) => {
+  try {
+    const savedUser = await updateProfile({
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      avatar_url: user.avatar_url,
+      password_hash: user.password_hash
+    });
+    setCurrentUser(savedUser);
+  } catch (err) {
+    console.error(err);
+  }
+};
 
   const handleDeleteUser = async (id: number) => {
     await deleteUser(id);

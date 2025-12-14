@@ -52,40 +52,37 @@ router.put('/:id', authMiddleware, requireRole(['admin','manager']), async (req:
   }
 });
 
-router.put('/profile', authMiddleware, async (req: AuthRequest, res) => {
+router.put('/profile', async (req, res) => {
   try {
-    const userId = req.user?.id;
-    if (!userId) return res.status(401).json({ error: 'Unauthorized' });
+    const { id, name, email, password_hash, avatar_url } = req.body;
+    if (!id) return res.status(400).json({ error: 'User ID is required' });
 
-    const payload: Partial<User> = { ...req.body };
+    const payload: Partial<User> = { name, email, avatar_url };
 
-    if (payload.avatar_url) {
-      payload.avatar_url = payload.avatar_url;
-      delete payload.avatar_url;
-    }
-
-    if (payload.password_hash) {
-      payload.password_hash = await hashPassword(payload.password_hash);
-      delete payload.password_hash;
+    if (password_hash) {
+      payload.password_hash = await hashPassword(password_hash);
     }
 
     if (Object.keys(payload).length === 0) {
       return res.status(400).json({ error: 'No data to update' });
     }
 
-    await db<User>('users').where({ id: userId }).update(payload);
+    await db<User>('users').where({ id }).update(payload);
 
     const user = await db<User>('users')
-      .where({ id: userId })
+      .where({ id })
       .first()
       .select('id','name','email','role','avatar_url','created_at');
 
     res.json({ data: user });
-  } catch (err) {
-    console.error('Error updating profile:', err);
+  } catch (err: unknown) {
+    const error = err instanceof Error ? err : new Error(String(err));
+    console.error('Error updating profile:', error.message, error.stack);
     res.status(500).json({ error: 'Server error' });
   }
 });
+
+
 
 
 // DELETE /api/users/:id
